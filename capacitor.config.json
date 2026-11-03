@@ -1,0 +1,15 @@
+{
+  "appId": "com.kimiagar.app",
+  "appName": "کیمیاگر",
+  "webDir": "www",
+  "backgroundColor": "#F6EFDF",
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_kimiagar",
+      "iconColor": "#1E5B3E"
+    }
+  }
+}

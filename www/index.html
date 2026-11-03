@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1E5B3E">
+<title>کیمیاگر</title>
+<style>
+@font-face { font-family: 'Peyda'; src: url('fonts/peyda.woff') format('woff'); font-weight: 400; font-display: block; }
+
+:root {
+  --bg: #F6EFDF;
+  --paper: #FFFBF2;
+  --line: #E7DCC4;
+  --ink: #26261F;
+  --muted: #7B7462;
+  --g900: #102419;
+  --g800: #16372A;
+  --g700: #1E5B3E;
+  --g600: #2A7650;
+  --g100: #E4EEDD;
+  --gold: #C4952B;
+  --gold2: #E9C766;
+  --goldbg: #FBF0D2;
+  --danger: #B5523F;
+  --r: 18px;
+  --shadow: 0 2px 10px rgba(70, 55, 20, .08);
+  --nav: 68px;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: var(--bg); }
+body {
+  font-family: 'Peyda', 'Noto Sans Arabic', sans-serif;
+  color: var(--ink); font-size: 15px; line-height: 1.75;
+  direction: rtl; overflow: hidden; user-select: none; -webkit-user-select: none;
+}
+input, textarea, button { font: inherit; color: inherit; }
+textarea, input { user-select: text; -webkit-user-select: text; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+h1, h2, h3, p { margin: 0; }
+
+#app { position: fixed; inset: 0; display: flex; flex-direction: column; }
+.screen { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; position: relative; }
+.screen.with-nav { padding-bottom: calc(var(--nav) + 16px); }
+.pad { padding: 20px 18px; }
+.center { text-align: center; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.tiny { font-size: 12px; }
+.bold { font-weight: 700; }
+.gold { color: var(--gold); }
+.row { display: flex; align-items: center; gap: 10px; }
+.between { justify-content: space-between; }
+.grow { flex: 1; min-width: 0; }
+.stack > * + * { margin-top: 12px; }
+.fade-in { animation: fadeIn .28s ease both; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Buttons */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; min-height: 52px; border-radius: 26px; padding: 0 20px;
+  background: var(--g700); color: #fff; font-weight: 700; font-size: 16px;
+  box-shadow: 0 4px 14px rgba(30, 91, 62, .28);
+  transition: transform .12s ease, opacity .2s;
+}
+.btn:active { transform: scale(.98); }
+.btn[disabled] { opacity: .45; box-shadow: none; }
+.btn.ghost { background: transparent; color: var(--g700); box-shadow: none; border: 1.5px solid var(--g700); }
+.btn.light { background: rgba(255,255,255,.12); color: #fff; border: 1.5px solid rgba(255,255,255,.7); box-shadow: none; }
+.btn.soft { background: var(--g100); color: var(--g700); box-shadow: none; }
+.btn.sm { min-height: 40px; font-size: 14px; width: auto; padding: 0 16px; }
+.link { color: var(--g700); font-weight: 700; font-size: 14px; padding: 8px 4px; }
+.arrow { font-size: 18px; line-height: 1; }
+
+/* Cards */
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 16px; }
+.card.tight { padding: 12px 14px; }
+.section-title { font-weight: 700; font-size: 16px; margin: 22px 2px 10px; display: flex; justify-content: space-between; align-items: center; }
+
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 20px; font-size: 12px; background: var(--g100); color: var(--g700); font-weight: 700; }
+.chip.gold { background: var(--goldbg); color: #8A6413; }
+.xp { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; color: #8A6413; font-size: 13px; white-space: nowrap; }
+.flask { width: 16px; height: 16px; flex: none; }
+
+/* Onboarding */
+.ob { min-height: 100vh; display: flex; flex-direction: column; padding: 28px 20px 22px; }
+.ob h2 { font-size: 21px; text-align: center; line-height: 1.6; margin-top: 8px; }
+.ob .sub { text-align: center; color: var(--muted); font-size: 13px; margin-top: 4px; }
+.ob .body { flex: 1; margin-top: 20px; }
+.ob .foot { margin-top: 18px; }
+.dots { display: flex; gap: 6px; justify-content: center; margin-top: 14px; }
+.dots i { width: 6px; height: 6px; border-radius: 3px; background: #D5CBB3; transition: width .2s; }
+.dots i.on { width: 18px; background: var(--g700); }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.opt {
+  background: var(--paper); border: 1.5px solid var(--line); border-radius: var(--r);
+  padding: 16px 10px; text-align: center; transition: all .15s; position: relative;
+}
+.opt .ic { font-size: 34px; line-height: 1.3; display: block; }
+.opt .t { font-weight: 700; margin-top: 4px; display: block; }
+.opt.sel { border-color: var(--g700); background: #EFF5EA; box-shadow: 0 0 0 3px rgba(30,91,62,.12); }
+.opt.sel::after { content: '✓'; position: absolute; top: 8px; left: 10px; width: 20px; height: 20px; border-radius: 10px; background: var(--g700); color: #fff; font-size: 12px; line-height: 20px; }
+.optrow { display: flex; align-items: center; gap: 14px; text-align: right; padding: 14px 16px; }
+.optrow .ic { font-size: 30px; }
+.optrow.sel::after { top: 50%; margin-top: -10px; }
+
+.list-opt { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--paper); border: 1.5px solid var(--line); border-radius: 14px; }
+.list-opt + .list-opt { margin-top: 8px; }
+.list-opt .ic { font-size: 22px; width: 30px; text-align: center; }
+.list-opt.sel { border-color: var(--g700); background: #EFF5EA; }
+.check { width: 24px; height: 24px; border-radius: 12px; border: 2px solid #CFC4AA; flex: none; display: grid; place-items: center; color: #fff; font-size: 13px; transition: all .15s; }
+.sel .check, .check.on { background: var(--g700); border-color: var(--g700); }
+
+.field { width: 100%; background: var(--paper); border: 1.5px solid var(--line); border-radius: 14px; padding: 14px; font-size: 16px; outline: none; resize: none; }
+.field:focus { border-color: var(--g700); }
+label.lbl { display: block; font-weight: 700; font-size: 14px; margin: 14px 2px 6px; }
+
+/* Hero & dark scenes */
+.hero { position: relative; min-height: 100vh; color: #fff; display: flex; flex-direction: column; overflow: hidden; }
+.hero .scene { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hero .content { position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column; padding: 34px 22px 26px; }
+.logo { width: 74px; height: 74px; margin: 0 auto; display: block; }
+.brand { font-size: 34px; font-weight: 700; text-align: center; color: var(--g800); margin-top: 6px; letter-spacing: -.5px; }
+.hero .tag { text-align: center; color: var(--g800); font-size: 15px; margin-top: 6px; }
+.dark { background: linear-gradient(180deg, #0E1F17 0%, #173A2A 55%, #1E3F2C 100%); color: #F3EBD6; }
+
+.flow { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 26px 0 8px; }
+.flow .node { display: flex; align-items: center; gap: 14px; }
+.flow .orb { width: 70px; height: 70px; border-radius: 50%; display: grid; place-items: center; font-size: 30px;
+  background: radial-gradient(circle at 50% 40%, #2E6A4A, #13301F); border: 2px solid var(--gold2); box-shadow: 0 0 22px rgba(233,199,102,.45); }
+.flow .lbl2 { width: 90px; font-weight: 700; color: var(--gold2); }
+.flow .lbl2 small { display: block; color: #E7DDC5; font-weight: 400; }
+.flow .down { color: var(--gold2); font-size: 18px; margin-left: 104px; }
+
+/* Header */
+.head { padding: 22px 18px 6px; }
+.head h1 { font-size: 22px; }
+.head .date { font-size: 12px; color: var(--muted); }
+
+/* Mission card */
+.mission-hero { border-radius: 22px; overflow: hidden; background: var(--paper); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.mission-hero .top { position: relative; height: 112px; }
+.mission-hero .top svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mission-hero .badge { position: absolute; bottom: -26px; right: 50%; transform: translateX(50%); width: 60px; height: 60px; border-radius: 50%;
+  background: var(--paper); border: 2px solid var(--gold2); display: grid; place-items: center; font-size: 30px; box-shadow: var(--shadow); }
+.mission-hero .inner { padding: 32px 16px 16px; text-align: center; }
+.mission-hero h3 { font-size: 18px; }
+.meta3 { display: grid; grid-template-columns: repeat(3, 1fr); margin: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.meta3 > div { padding: 10px 4px; text-align: center; font-size: 12px; color: var(--muted); }
+.meta3 > div + div { border-right: 1px solid var(--line); }
+.meta3 b { display: block; color: var(--ink); font-size: 13px; }
+
+/* Routine row */
+.rt { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+.rt + .rt { border-top: 1px solid var(--line); }
+.rt .ic { font-size: 22px; width: 34px; height: 34px; border-radius: 10px; background: var(--bg); display: grid; place-items: center; flex: none; }
+.rt .t { font-weight: 700; font-size: 14px; }
+.rt.done .t { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(0,0,0,.25); }
+.rt .tick { width: 44px; height: 44px; display: grid; place-items: center; margin: -6px; }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.stat { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 12px 6px; text-align: center; }
+.stat .v { font-size: 20px; font-weight: 700; display: block; line-height: 1.4; }
+.stat .k { font-size: 12px; color: var(--muted); }
+
+.world-preview { position: relative; height: 130px; border-radius: 20px; overflow: hidden; display: block; width: 100%; }
+.world-preview svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.world-preview .cta { position: absolute; left: 12px; bottom: 12px; background: rgba(16,36,25,.78); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+.world-preview .lbl3 { position: absolute; right: 14px; top: 12px; color: #fff; font-weight: 700; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+
+.micro-btn { display: flex; align-items: center; gap: 12px; width: 100%; text-align: right; padding: 14px 16px; border-radius: 16px; background: var(--g100); border: 1px dashed #A9C4A1; }
+.micro-btn .ic { font-size: 24px; }
+
+/* Bottom nav */
+.nav { position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav); background: var(--paper); border-top: 1px solid var(--line);
+  display: grid; grid-template-columns: repeat(5, 1fr); z-index: 20; box-shadow: 0 -4px 16px rgba(70,55,20,.06); }
+.nav button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #9A927E; font-size: 11px; }
+.nav button svg { width: 24px; height: 24px; }
+.nav button.on { color: var(--g700); font-weight: 700; }
+.nav button.on svg { stroke-width: 2.2; }
+
+/* Tabs */
+.tabs { display: flex; background: #EDE4CF; border-radius: 14px; padding: 4px; gap: 4px; }
+.tabs button { flex: 1; padding: 8px 4px; border-radius: 10px; font-size: 13px; color: var(--muted); font-weight: 700; }
+.tabs button.on { background: var(--paper); color: var(--g700); box-shadow: var(--shadow); }
+
+.filter { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 6px; scrollbar-width: none; }
+.filter::-webkit-scrollbar { display: none; }
+.filter button { flex: none; padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--line); background: var(--paper); font-size: 13px; }
+.filter button.on { background: var(--g700); color: #fff; border-color: var(--g700); }
+
+.mcard { display: flex; gap: 12px; align-items: flex-start; text-align: right; width: 100%; }
+.mcard .ic { font-size: 26px; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; flex: none; }
+.mcard h4 { margin: 0; font-size: 15px; }
+.mcard + .mcard { margin-top: 10px; }
+.donebadge { color: var(--g700); font-size: 12px; font-weight: 700; }
+.diff { letter-spacing: 1px; color: var(--gold); font-size: 11px; }
+
+/* Mission detail */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 14px 0; }
+.iconbtn { width: 44px; height: 44px; border-radius: 22px; display: grid; place-items: center; font-size: 20px; color: var(--ink); }
+.block { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; }
+.block h5 { margin: 0 0 4px; font-size: 13px; color: var(--g700); }
+
+/* Timer */
+.timer-ring { width: 170px; height: 170px; margin: 18px auto; position: relative; }
+.timer-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.timer-ring .val { position: absolute; inset: 0; display: grid; place-items: center; font-size: 34px; font-weight: 700; direction: ltr; color: var(--g800); }
+
+/* Result */
+.scale { display: flex; justify-content: space-between; gap: 8px; direction: rtl; }
+.scale button { flex: 1; height: 44px; border-radius: 22px; border: 1.5px solid var(--line); background: var(--paper); font-weight: 700; }
+.scale button.on { background: var(--g700); color: #fff; border-color: var(--g700); }
+.feel { display: flex; justify-content: space-between; gap: 6px; }
+.feel button { flex: 1; padding: 8px 2px; border-radius: 14px; border: 1.5px solid transparent; font-size: 11px; color: var(--muted); }
+.feel button span { font-size: 28px; display: block; line-height: 1.3; }
+.feel button.on { border-color: var(--g700); background: #EFF5EA; color: var(--g700); font-weight: 700; }
+.outcome { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.outcome button { padding: 12px 6px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--paper); font-size: 13px; font-weight: 700; }
+.outcome button.on { border-color: var(--g700); background: #EFF5EA; color: var(--g700); }
+
+/* Success */
+.reward { text-align: center; padding-top: 30px; }
+.reward .glow { width: 150px; height: 150px; margin: 10px auto 0; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle, rgba(233,199,102,.55) 0%, rgba(233,199,102,0) 70%); animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.06); } }
+.reward .amt { font-size: 40px; font-weight: 700; color: var(--gold2); direction: ltr; line-height: 1.3; }
+.insight { background: rgba(255,255,255,.08); border: 1px solid rgba(233,199,102,.45); border-radius: 18px; padding: 16px; margin-top: 18px; text-align: right; }
+
+/* Mirror */
+.weekbox { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
+.weekbox .v { font-size: 20px; font-weight: 700; }
+.ins { display: flex; gap: 12px; }
+.ins .q { font-size: 22px; }
+.bar { height: 8px; border-radius: 4px; background: #EDE4CF; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 4px; }
+
+/* World */
+.worldmap { position: relative; width: 100%; aspect-ratio: 3 / 4.3; border-radius: 22px; overflow: hidden; box-shadow: var(--shadow); }
+.worldmap > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pin { position: absolute; transform: translate(-50%, -30%); display: flex; flex-direction: column; align-items: center; text-align: center; width: 110px; }
+.pin .o { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; border: 2px solid var(--gold2);
+  background: radial-gradient(circle at 50% 35%, #3C8A5C, #154129); box-shadow: 0 0 18px rgba(233,199,102,.6); }
+.pin.locked .o { background: rgba(20,30,24,.72); border-color: rgba(255,255,255,.55); box-shadow: none; font-size: 20px; }
+.pin .n { margin-top: 4px; background: rgba(16,36,25,.82); color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.pin .req { font-size: 10.5px; color: #fff; background: rgba(0,0,0,.45); border-radius: 8px; padding: 1px 6px; margin-top: 2px; line-height: 1.6; }
+
+/* Profile */
+.avatar { width: 92px; height: 92px; border-radius: 50%; margin: 0 auto; border: 3px solid var(--gold2); overflow: hidden; box-shadow: 0 0 20px rgba(233,199,102,.5); background: #2A6A48; display: grid; place-items: center; font-size: 42px; }
+.crys { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; text-align: center; }
+.crys div { font-size: 26px; filter: grayscale(1) opacity(.35); }
+.crys div.on { filter: none; }
+.setrow { display: flex; align-items: center; gap: 12px; padding: 14px 4px; min-height: 52px; }
+.setrow + .setrow { border-top: 1px solid var(--line); }
+.switch { width: 48px; height: 28px; border-radius: 14px; background: #D3C9B0; position: relative; flex: none; transition: background .2s; }
+.switch::after { content: ''; position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; border-radius: 11px; background: #fff; transition: right .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+.switch.on { background: var(--g700); }
+.switch.on::after { right: 23px; }
+input[type=time] { direction: ltr; background: var(--bg); border: 1.5px solid var(--line); border-radius: 10px; padding: 6px 8px; font-size: 15px; min-height: 40px; }
+.days { display: flex; gap: 5px; flex-wrap: wrap; }
+.days button { width: 38px; height: 38px; border-radius: 19px; border: 1.5px solid var(--line); background: var(--paper); font-size: 13px; }
+.days button.on { background: var(--g700); color: #fff; border-color: var(--g700); }
+
+/* Sheet & toast */
+.overlay { position: fixed; inset: 0; background: rgba(16, 26, 20, .45); z-index: 40; display: flex; align-items: flex-end; animation: fadeIn .2s; }
+.sheet { background: var(--bg); width: 100%; max-height: 88%; overflow-y: auto; border-radius: 24px 24px 0 0; padding: 10px 18px 24px; animation: up .25s ease; }
+.sheet .grab { width: 40px; height: 5px; border-radius: 3px; background: #CFC4AA; margin: 0 auto 12px; }
+@keyframes up { from { transform: translateY(40px); opacity: .4; } }
+.toast { position: fixed; left: 16px; right: 16px; bottom: calc(var(--nav) + 14px); background: var(--g800); color: #fff; padding: 12px 16px; border-radius: 14px; z-index: 60; font-size: 14px; animation: fadeIn .2s; text-align: center; }
+.empty { text-align: center; color: var(--muted); padding: 26px 10px; font-size: 14px; }
+.empty .ic { font-size: 36px; display: block; margin-bottom: 6px; }
+.warn { background: #FCEBDD; border: 1px solid #EDC3A3; color: #7A3E1C; border-radius: 14px; padding: 12px 14px; font-size: 13px; }
+.note { background: var(--goldbg); border-radius: 14px; padding: 12px 14px; font-size: 13px; color: #6C5212; }
+.scene svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// کیمیاگر — محتوای پایه MVP (نسخه 1.1)
+window.DATA = {
+  paths: [
+    { id: 'self',      name: 'خودشناسی', icon: '🪞', color: '#4A7FB5', region: 'forest' },
+    { id: 'courage',   name: 'شجاعت',    icon: '🦁', color: '#D9822B', region: 'mountain' },
+    { id: 'action',    name: 'اقدام',     icon: '🎯', color: '#2E8B57', region: 'plain' },
+    { id: 'relations', name: 'روابط',     icon: '❤️', color: '#C8463D', region: 'village' },
+    { id: 'calm',      name: 'آرامش',    icon: '🪷', color: '#3FA7A0', region: 'lake' },
+    { id: 'meaning',   name: 'معنا',      icon: '⭐', color: '#8E6BB5', region: 'land' }
+  ],
+
+  // related: مسیرهای نزدیک (برای سهم ۲۰٪ تنوع مرتبط)
+  related: {
+    self: ['calm', 'meaning'], courage: ['action', 'relations'], action: ['courage', 'self'],
+    relations: ['courage', 'calm'], calm: ['self', 'relations'], meaning: ['self', 'action']
+  },
+
+  timeOptions: [
+    { min: 5,  title: '۵ دقیقه',  sub: 'قدم‌های کوچک', icon: '🌱' },
+    { min: 15, title: '۱۵ دقیقه', sub: 'رشد متعادل', icon: '🌿' },
+    { min: 30, title: '۳۰ دقیقه', sub: 'سفر عمیق‌تر', icon: '🌳' },
+    { min: 0,  title: 'بعداً خودم تنظیم می‌کنم', sub: 'پیش‌فرض: ۱۵ دقیقه', icon: '⏳' }
+  ],
+
+  routineTemplates: [
+    { key: 'book',     title: '۳ صفحه کتاب',          icon: '📖', xp: 10, path: 'self',      time: '21:30', note: '📖 وقت ۳ صفحه کتاب امروزته. فقط یک قدم.' },
+    { key: 'walk',     title: '۱۵ دقیقه پیاده‌روی',    icon: '🚶', xp: 15, path: 'calm',      time: '18:00', note: '🚶 ۱۵ دقیقه برای خودت؛ همین امروز.' },
+    { key: 'sport',    title: '۱۵ دقیقه ورزش',        icon: '💪', xp: 15, path: 'action',    time: '07:30', note: '💪 ۱۵ دقیقه حرکت؛ بدنت ممنونت می‌شود.' },
+    { key: 'thanks',   title: '۳ مورد شکرگزاری',      icon: '🧡', xp: 10, path: 'relations', time: '22:00', note: '🧡 سه چیز خوب امروز را یادداشت کن.' },
+    { key: 'calm',     title: '۵ دقیقه آرامش',        icon: '🪷', xp: 10, path: 'calm',      time: '13:30', note: '🪷 پنج دقیقه مکث؛ فقط نفس.' },
+    { key: 'water',    title: 'نوشیدن آب کافی',        icon: '💧', xp: 10, path: 'action',    time: '11:00', note: '💧 یک لیوان آب؛ همین حالا.' },
+    { key: 'sleep',    title: 'آماده‌شدن برای خواب',    icon: '🌙', xp: 10, path: 'calm',      time: '23:00', note: '🌙 کم‌کم صفحه را خاموش کن؛ وقت آرام‌شدن است.' }
+  ],
+
+  // difficulty: 1 آسان، 2 متوسط، 3 چالشی
+  missions: [
+    // خودشناسی
+    { id: 'm-self-1', path: 'self', d: 1, min: 5,  xp: 20, title: 'نقشه انرژی امروز',
+      why: 'وقتی بدانی چه چیزی انرژی‌ات را بالا یا پایین می‌برد، انتخاب‌های بهتری می‌کنی.',
+      act: 'سه کاری را که امروز انجام دادی بنویس و کنار هرکدام علامت بزن: انرژی داد یا انرژی گرفت؟' },
+    { id: 'm-self-2', path: 'self', d: 1, min: 5,  xp: 20, title: 'مکث سه‌نفسی',
+      why: 'نام‌گذاری احساس، فاصله کوچکی میان احساس و واکنش می‌سازد.',
+      act: 'دفعه بعد که امروز کلافه یا ناراحت شدی، قبل از هر واکنشی سه نفس بکش و احساست را با یک کلمه نام ببر.' },
+    { id: 'm-self-3', path: 'self', d: 2, min: 10, xp: 25, title: 'یک ارزش، یک شاهد',
+      why: 'ارزش‌ها وقتی واقعی می‌شوند که در رفتار دیده شوند.',
+      act: 'یکی از ارزش‌هایت را انتخاب کن و لحظه‌ای از امروز را پیدا کن که مطابقش رفتار کردی یا نکردی. آن را بنویس.' },
+    { id: 'm-self-4', path: 'self', d: 2, min: 10, xp: 25, title: 'بازنویسی صدای منتقد',
+      why: 'جمله‌های درونی ما را می‌سازند؛ می‌شود لحنشان را تغییر داد.',
+      act: 'جمله‌ای را که امروز منتقد درونت گفت بنویس، بعد آن را همان‌طور بازنویسی کن که یک دوست مهربان می‌گفت.' },
+    { id: 'm-self-5', path: 'self', d: 2, min: 15, xp: 30, title: 'نامه به خودِ ۳۰ روز بعد',
+      why: 'نوشتن برای آینده، نیتت را شفاف‌تر و ملموس‌تر می‌کند.',
+      act: 'یک پاراگراف برای خودت در ۳۰ روز آینده بنویس: امیدواری چه چیزی را تجربه کرده باشی؟' },
+    { id: 'm-self-6', path: 'self', d: 3, min: 15, xp: 35, title: 'شمارنده غر',
+      why: 'مشاهده بدون قضاوت، اولین قدم تغییر یک الگوست.',
+      act: 'تا دو ساعت آینده فقط بشمار چند بار گله یا غر زدی. هیچ تلاشی برای تغییرش نکن؛ فقط بشمار.' },
+    // شجاعت
+    { id: 'm-courage-1', path: 'courage', d: 1, min: 5,  xp: 25, title: 'یک سؤال در جمع',
+      why: 'شجاعت با قدم‌های کوچک ساخته می‌شود، نه با پرش‌های بزرگ.',
+      act: 'امروز یک سؤال بپرس که معمولاً آن را نگه می‌داری؛ در کلاس، جلسه یا مغازه.' },
+    { id: 'm-courage-2', path: 'courage', d: 1, min: 5,  xp: 25, title: 'سلام به یک غریبه',
+      why: 'تماس کوتاه با دیگران، ترس از قضاوت را واقعی‌سنجی می‌کند.',
+      act: 'از یک غریبه چیز ساده‌ای بپرس؛ مثلاً نشانی یا پیشنهاد یک غذا. فقط همین.' },
+    { id: 'm-courage-3', path: 'courage', d: 2, min: 5,  xp: 30, title: 'یک «نه»ی کوچک',
+      why: 'مرزبندی سالم، احترام به خود و دیگری است.',
+      act: 'امروز به یک درخواست کوچک که واقعاً نمی‌خواهی، مؤدبانه «نه» بگو.' },
+    { id: 'm-courage-4', path: 'courage', d: 2, min: 10, xp: 30, title: 'نظرت را بگو',
+      why: 'صدای تو هم بخشی از گفت‌وگوست.',
+      act: 'در یک گفت‌وگوی امروز، یک‌بار نظر واقعی‌ات را بگو؛ حتی اگر با دیگران فرق دارد.' },
+    { id: 'm-courage-5', path: 'courage', d: 2, min: 10, xp: 30, title: 'پنج دقیقه با کار ترسناک',
+      why: 'هدف حذف ترس نیست؛ اقدام با وجود ترس است.',
+      act: 'فقط ۵ دقیقه اول کاری را انجام بده که از ترس عقب انداخته‌ای؛ یک تماس، یک ایمیل یا یک پیام.' },
+    { id: 'm-courage-6', path: 'courage', d: 3, min: 10, xp: 35, title: 'درخواست کمک',
+      why: 'کمک خواستن نشانه قدرت است، نه ضعف.',
+      act: 'از یک نفر برای یک کار واقعی کمک بخواه و ببین واقعاً چه اتفاقی می‌افتد.' },
+    // اقدام
+    { id: 'm-action-1', path: 'action', d: 1, min: 5,  xp: 20, title: 'قانون دو دقیقه',
+      why: 'شروع، سخت‌ترین بخش است؛ پس آن را کوچک کن.',
+      act: 'یک کار معوق را انتخاب کن و فقط دو دقیقه اولش را انجام بده. اگر خواستی ادامه بده.' },
+    { id: 'm-action-2', path: 'action', d: 1, min: 10, xp: 20, title: 'یک سطح مرتب',
+      why: 'محیط مرتب، اصطکاک شروع کارها را کم می‌کند.',
+      act: 'فقط یک سطح را مرتب کن: میز، یک قفسه یا کیفت.' },
+    { id: 'm-action-3', path: 'action', d: 1, min: 5,  xp: 20, title: 'حذف یک اصطکاک',
+      why: 'وقتی شروع آسان باشد، تکرار ممکن می‌شود.',
+      act: 'محیط را برای یک عادت آماده کن؛ مثلاً کتاب را روی بالش بگذار یا کفش ورزشی را کنار در.' },
+    { id: 'm-action-4', path: 'action', d: 2, min: 10, xp: 25, title: 'سه کار مهم فردا',
+      why: 'برنامه کوتاه، ذهن را از درگیری آزاد می‌کند.',
+      act: 'سه کار مهم فردا را بنویس و کوچک‌ترینشان را همین حالا شروع کن.' },
+    { id: 'm-action-5', path: 'action', d: 2, min: 25, xp: 30, title: '۲۵ دقیقه تمرکز',
+      why: 'تمرکز عمیق، کیفیت کار را چند برابر می‌کند.',
+      act: 'گوشی را بی‌صدا کن و ۲۵ دقیقه فقط روی یک کار بمان.' },
+    { id: 'm-action-6', path: 'action', d: 3, min: 30, xp: 35, title: 'تمام‌کردن یک نیمه‌کاره',
+      why: 'کارهای نیمه‌تمام، بی‌صدا انرژی می‌گیرند.',
+      act: 'یک کار نیمه‌تمام را انتخاب کن و تمامش کن.' },
+    // روابط
+    { id: 'm-relations-1', path: 'relations', d: 1, min: 5,  xp: 20, title: 'پیام قدردانی',
+      why: 'قدردانی مشخص، رابطه را گرم‌تر از هر هدیه‌ای می‌کند.',
+      act: 'برای یک نفر پیام بفرست و دقیقاً بگو برای چه چیزی از او ممنونی.' },
+    { id: 'm-relations-2', path: 'relations', d: 1, min: 5,  xp: 20, title: 'تعریف واقعی',
+      why: 'دیده‌شدن، نیاز عمیق همه ماست.',
+      act: 'امروز رودررو یک تعریف صادقانه و مشخص از کسی بکن.' },
+    { id: 'm-relations-3', path: 'relations', d: 2, min: 10, xp: 25, title: 'گوش‌دادن کامل',
+      why: 'گوش‌دادن بی‌وقفه، هدیه‌ای کمیاب است.',
+      act: 'در یک گفت‌وگو بدون قطع کردن حرف و بدون گوشی گوش بده و یک سؤال ادامه‌دهنده بپرس.' },
+    { id: 'm-relations-4', path: 'relations', d: 2, min: 10, xp: 25, title: 'تماس با کسی که دلت برایش تنگ شده',
+      why: 'رابطه‌ها با تماس‌های کوچک زنده می‌مانند.',
+      act: 'به کسی زنگ بزن که مدتی است با او حرف نزده‌ای؛ فقط برای احوال‌پرسی.' },
+    { id: 'm-relations-5', path: 'relations', d: 2, min: 15, xp: 25, title: 'یک کار کوچک بی‌چشمداشت',
+      why: 'مهربانی بی‌چشمداشت، حال هر دو طرف را خوب می‌کند.',
+      act: 'یک کار کوچک برای کسی انجام بده، بدون اینکه چیزی در عوض بخواهی.' },
+    { id: 'm-relations-6', path: 'relations', d: 3, min: 10, xp: 35, title: 'بیان یک نیاز',
+      why: 'دیگران ذهن ما را نمی‌خوانند؛ نیاز گفته‌شده شانس برآورده‌شدن دارد.',
+      act: 'یک نیاز کوچک را با جمله «من … نیاز دارم» به کسی بگو.' },
+    // آرامش
+    { id: 'm-calm-1', path: 'calm', d: 1, min: 5,  xp: 20, title: 'تنفس ۴-۶',
+      why: 'بازدم طولانی‌تر، بدن را به حالت آرامش می‌برد.',
+      act: '۵ دقیقه نفس بکش: ۴ شماره دم، ۶ شماره بازدم.' },
+    { id: 'm-calm-2', path: 'calm', d: 1, min: 5,  xp: 20, title: 'زمینی‌شدن ۵-۴-۳-۲-۱',
+      why: 'حواس پنج‌گانه تو را به لحظه حال برمی‌گرداند.',
+      act: '۵ چیز ببین، ۴ چیز لمس کن، ۳ صدا بشنو، ۲ بو حس کن و ۱ مزه را مزه‌مزه کن.' },
+    { id: 'm-calm-3', path: 'calm', d: 1, min: 5,  xp: 20, title: 'اسکن بدن',
+      why: 'بدن پیش از ذهن خبر از تنش می‌دهد.',
+      act: 'چشم‌ها را ببند و از سر تا پا توجهت را حرکت بده. هرجا گرفتگی بود، فقط ببینش.' },
+    { id: 'm-calm-4', path: 'calm', d: 2, min: 5,  xp: 25, title: 'نام و نمره احساس',
+      why: 'وقتی احساس نام دارد، کمتر فرمان می‌دهد.',
+      act: 'وقتی احساس شدیدی آمد، قبل از واکنش اسمش را بگو و از ۱ تا ۱۰ نمره بده.' },
+    { id: 'm-calm-5', path: 'calm', d: 2, min: 15, xp: 25, title: 'پیاده‌روی بدون گوشی',
+      why: 'ذهن در حرکت آرام، خودش را مرتب می‌کند.',
+      act: '۱۵ دقیقه پیاده‌روی کن و گوشی را در جیب یا خانه بگذار.' },
+    { id: 'm-calm-6', path: 'calm', d: 3, min: 30, xp: 30, title: '۳۰ دقیقه بدون اعلان',
+      why: 'توجه تو ارزشمند است؛ از آن محافظت کن.',
+      act: 'همه اعلان‌ها را ۳۰ دقیقه خاموش کن و ببین چه حسی داری.' },
+    // معنا
+    { id: 'm-meaning-1', path: 'meaning', d: 1, min: 10, xp: 20, title: 'سه ارزش من',
+      why: 'وقتی ارزش‌هایت را بدانی، تصمیم‌ها ساده‌تر می‌شوند.',
+      act: 'سه ارزش مهم زندگی‌ات را بنویس و برای هرکدام یک جمله بنویس که چرا مهم است.' },
+    { id: 'm-meaning-2', path: 'meaning', d: 1, min: 10, xp: 20, title: 'لحظه معنا',
+      why: 'گذشته نشان می‌دهد چه چیزی برایت معنا می‌سازد.',
+      act: 'لحظه‌ای را به یاد بیاور که زندگی‌ات را معنادار حس کردی. بنویس چه چیزی آن را معنادار کرد.' },
+    { id: 'm-meaning-3', path: 'meaning', d: 2, min: 10, xp: 25, title: 'سؤال بزرگ',
+      why: 'سؤال‌های بزرگ، مسیر قدم‌های کوچک را روشن می‌کنند.',
+      act: 'به این سؤال جواب بده: «دوست دارم دیگران مرا با چه چیزی به یاد بیاورند؟»' },
+    { id: 'm-meaning-4', path: 'meaning', d: 2, min: 15, xp: 30, title: 'یک قدم برای یک ارزش',
+      why: 'ارزش بدون رفتار، فقط یک کلمه است.',
+      act: 'یکی از ارزش‌هایت را انتخاب کن و امروز یک کار کوچک مطابق آن انجام بده.' },
+    { id: 'm-meaning-5', path: 'meaning', d: 2, min: 15, xp: 30, title: 'کمک به یک نفر',
+      why: 'معنا اغلب در اثر ما بر دیگران پیدا می‌شود.',
+      act: 'امروز به یک نفر در کاری که برایش مهم است کمک کن.' },
+    { id: 'm-meaning-6', path: 'meaning', d: 3, min: 30, xp: 35, title: 'وقتی برای آنچه دوستش داری',
+      why: 'کارهایی که دوستشان داریم، ما را به خودمان برمی‌گردانند.',
+      act: '۳۰ دقیقه را فقط به کاری بده که دوستش داری و مدت‌هاست سراغش نرفته‌ای.' }
+  ],
+
+  // مأموریت‌های مخفی؛ با باز شدن منطقه مربوط آزاد می‌شوند
+  hidden: [
+    { id: 'h-forest', path: 'self', region: 'forest', d: 2, min: 15, xp: 50, hidden: true, title: 'راز جنگل آینه‌ها',
+      why: 'پنج کشف ثبت کرده‌ای؛ وقت دیدن الگوهاست.',
+      act: 'کشف‌های آینه‌ات را مرور کن و یک الگوی تکرارشونده را انتخاب کن که می‌خواهی این هفته رویش کار کنی.' },
+    { id: 'h-mountain', path: 'courage', region: 'mountain', d: 3, min: 15, xp: 50, hidden: true, title: 'دروازه کوه شجاعت',
+      why: 'سه اقدام شجاعانه انجام داده‌ای؛ آماده قدم بزرگ‌تری.',
+      act: 'گفت‌وگویی را شروع کن که مدتی است عقب انداخته‌ای. فقط شروعش کافی است.' },
+    { id: 'h-plain', path: 'action', region: 'plain', d: 3, min: 30, xp: 50, hidden: true, title: 'یک روز، یک اولویت',
+      why: 'وقتی همه‌چیز مهم است، هیچ‌چیز پیش نمی‌رود.',
+      act: 'فقط یک اولویت برای امروز انتخاب کن و تا تمام نشده سراغ کار دیگری نرو.' },
+    { id: 'h-village', path: 'relations', region: 'village', d: 3, min: 30, xp: 50, hidden: true, title: 'دعوت دهکده',
+      why: 'رابطه‌ها با وقت مشترک عمیق می‌شوند.',
+      act: 'از یک دوست برای یک قرار ساده دعوت کن؛ یک چای، یک قدم‌زدن.' },
+    { id: 'h-lake', path: 'calm', region: 'lake', d: 2, min: 20, xp: 50, hidden: true, title: 'سکوت دریاچه',
+      why: 'طبیعت، سیستم عصبی را آرام می‌کند.',
+      act: '۲۰ دقیقه در فضای سبز یا کنار آسمان باز بنشین، بدون گوشی.' },
+    { id: 'h-land', path: 'meaning', region: 'land', d: 3, min: 20, xp: 50, hidden: true, title: 'بیانیه سرزمین معنا',
+      why: 'وقتی بدانی برای چه زندگی می‌کنی، چگونه‌اش را پیدا می‌کنی.',
+      act: 'بیانیه شخصی‌ات را در سه جمله بنویس: چه کسی هستی، به چه چیزی اهمیت می‌دهی، و چه می‌خواهی بسازی.' }
+  ],
+
+  // «امروز فقط همین» — اقدام ۲ تا ۵ دقیقه‌ای برای روزهای کم‌انرژی
+  micro: [
+    'یک لیوان آب را آرام و با حواس جمع بنوش.',
+    'کنار پنجره ۱۰ نفس عمیق بکش.',
+    'یک جمله بنویس: «الان حالم … است.»',
+    'دو دقیقه بدنت را کش بده.',
+    'برای کسی که دوستش داری یک پیام کوتاه محبت‌آمیز بفرست.',
+    'یک چیز کوچک را که امروز به آن افتخار می‌کنی بنویس.',
+    'سه دقیقه بدون هدف در اتاق یا حیاط قدم بزن.',
+    'یک کشو یا یک پوشه را مرتب کن.'
+  ],
+
+  outcomes: [
+    { id: 'easier', t: 'راحت‌تر از انتظارم' },
+    { id: 'same',   t: 'تقریباً همان‌طور' },
+    { id: 'harder', t: 'سخت‌تر از انتظارم' },
+    { id: 'failed', t: 'نتوانستم انجامش بدهم' }
+  ],
+
+  feelings: [
+    { id: 'proud', e: '😊', t: 'راضی' },
+    { id: 'calm',  e: '😌', t: 'آرام' },
+    { id: 'meh',   e: '😐', t: 'معمولی' },
+    { id: 'tired', e: '😮‍💨', t: 'خسته' },
+    { id: 'wow',   e: '🤩', t: 'پرانرژی' }
+  ],
+
+  regions: [
+    { id: 'forest',   name: 'جنگل آینه‌ها',  path: 'self',      xp: 0,   steps: 0, x: 27, y: 12 },
+    { id: 'mountain', name: 'کوه شجاعت',     path: 'courage',   xp: 150, steps: 3, x: 70, y: 14 },
+    { id: 'plain',    name: 'دشت اقدام',      path: 'action',    xp: 150, steps: 3, x: 32, y: 40 },
+    { id: 'village',  name: 'دهکده پیوند',    path: 'relations', xp: 300, steps: 3, x: 74, y: 52 },
+    { id: 'lake',     name: 'دریاچه آرامش',  path: 'calm',      xp: 300, steps: 3, x: 27, y: 67 },
+    { id: 'land',     name: 'سرزمین معنا',    path: 'meaning',   xp: 500, steps: 3, x: 62, y: 81 }
+  ],
+
+  crystals: [
+    { id: 'courage',  name: 'کریستال شجاعت',  icon: '🔶', rule: '۳ مأموریت شجاعت انجام‌شده' },
+    { id: 'streak',   name: 'کریستال استمرار', icon: '🔥', rule: 'شعله ۷ روزه' },
+    { id: 'aware',    name: 'کریستال آگاهی',   icon: '🔷', rule: '۵ کشف ذخیره‌شده در آینه' },
+    { id: 'bond',     name: 'کریستال پیوند',   icon: '❤️‍🔥', rule: '۳ مأموریت روابط انجام‌شده' },
+    { id: 'peace',    name: 'کریستال آرامش',   icon: '💠', rule: '۱۰ قدم واقعی در مسیر آرامش' },
+    { id: 'meaning',  name: 'کریستال معنا',    icon: '💜', rule: '۳ مأموریت معنا انجام‌شده' }
+  ],
+
+  levels: ['تازه‌کار', 'جوینده', 'رهرو', 'سازنده', 'کاشف', 'استادکار', 'کیمیاگر', 'کیمیاگر ارشد']
+};
+
+</script>
+<script>
+// تصاویر برداری (SVG) — الهام‌گرفته از پالت تصویر پیشنهادی
+window.ART = (function () {
+  let uid = 0;
+  const id = (p) => p + (++uid);
+
+  function logo(size) {
+    const g = id('lq'), s = size || 74;
+    return `<svg class="logo" style="width:${s}px;height:${s}px" viewBox="0 0 64 64" aria-label="لوگو کیمیاگر" role="img">
+      <defs><radialGradient id="${g}" cx=".5" cy=".55" r=".65"><stop offset="0" stop-color="#F7DE84"/><stop offset=".55" stop-color="#7DBA5A"/><stop offset="1" stop-color="#2A7650"/></radialGradient></defs>
+      <path d="M38 8c3-6 11-7 16-4-3 6-10 8-16 4z" fill="#2A7650"/><path d="M38 8c5-1 10-2 14-4" stroke="#1E5B3E" stroke-width="1" fill="none"/>
+      <path d="M26 9h12v13c9 3 15 11 15 20 0 12-9.5 18-21 18S11 54 11 42c0-9 6-17 15-20z" fill="#FFF8E6" stroke="#1E5B3E" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M14.2 40c6-3.5 11.5 1.8 17.6-.8 6-2.6 11-3 17.9.6.4 1 .3 1.6.3 2.2 0 9.5-8 15-18 15s-18-5.5-18-15c0-.7.1-1.4.2-2z" fill="url(#${g})"/>
+      <circle cx="25" cy="47" r="1.8" fill="#FFF6D5" opacity=".9"/><circle cx="36" cy="51" r="1.2" fill="#FFF6D5" opacity=".8"/><circle cx="31" cy="44" r="1" fill="#FFF6D5"/>
+      <rect x="23.5" y="5.5" width="17" height="5" rx="2.2" fill="#C4952B"/>
+      <path d="M50 22l1.2 2.6 2.6 1.2-2.6 1.2L50 29.6l-1.2-2.6-2.6-1.2 2.6-1.2z" fill="#E9C766"/>
+    </svg>`;
+  }
+
+  function flask(cls) {
+    return `<svg class="${cls || 'flask'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6v5.2c3.3 1.2 5.5 4.2 5.5 7.6C20.5 20 16.7 22 12 22s-8.5-2-8.5-6.2c0-3.4 2.2-6.4 5.5-7.6z" fill="#F4D77A" stroke="#A7791C" stroke-width="1.6" stroke-linejoin="round"/><path d="M5.3 15c2.4-1.3 4.6.6 6.7-.3 2.2-.9 4.1-1 6.6.2.1 3.2-2.9 5.3-6.6 5.3s-6.8-2-6.7-5.2z" fill="#C4952B"/><rect x="8" y="1.6" width="8" height="2.6" rx="1" fill="#A7791C"/></svg>`;
+  }
+
+  function mountains(w, h, cfg) {
+    // cfg: {sky:[top,bottom], sun, far, mid, near, front, river, castle, trees, stars, moon}
+    const sky = id('sky'), sun = id('sun'), mist = id('mist');
+    let s = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="${sky}" x1="0" y1="0" x2="0" y2="1">${cfg.sky.map((c, i) => `<stop offset="${i / (cfg.sky.length - 1)}" stop-color="${c}"/>`).join('')}</linearGradient>
+        <radialGradient id="${sun}"><stop offset="0" stop-color="${cfg.sunColor || '#FFF4C8'}" stop-opacity="1"/><stop offset=".35" stop-color="${cfg.sunColor || '#FBE29A'}" stop-opacity=".75"/><stop offset="1" stop-color="${cfg.sunColor || '#F7D98A'}" stop-opacity="0"/></radialGradient>
+        <linearGradient id="${mist}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity="${cfg.mist || 0}"/></linearGradient>
+      </defs>
+      <rect width="${w}" height="${h}" fill="url(#${sky})"/>`;
+    if (cfg.stars) {
+      let st = '';
+      for (let i = 0; i < 46; i++) {
+        const x = (i * 73.3 + 17) % w, y = (i * 37.7 + 11) % (h * .45), r = (i % 3) * .45 + .5;
+        st += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="#FFF6D8" opacity="${.35 + (i % 4) * .15}"/>`;
+      }
+      s += st;
+    }
+    if (cfg.sun) s += `<circle cx="${cfg.sun[0]}" cy="${cfg.sun[1]}" r="${cfg.sun[2]}" fill="url(#${sun})"/>`;
+    if (cfg.moon) s += `<circle cx="${cfg.moon[0]}" cy="${cfg.moon[1]}" r="${cfg.moon[2]}" fill="#F6E7B8"/><circle cx="${cfg.moon[0] + cfg.moon[2] * .45}" cy="${cfg.moon[1] - cfg.moon[2] * .25}" r="${cfg.moon[2]}" fill="${cfg.sky[0]}"/>`;
+    const H = h, W = w;
+    const y = (f) => (H * f).toFixed(1);
+    // far range
+    s += `<path d="M0 ${y(.5)} L${W * .12} ${y(.38)} L${W * .22} ${y(.45)} L${W * .36} ${y(.3)} L${W * .5} ${y(.44)} L${W * .62} ${y(.34)} L${W * .78} ${y(.46)} L${W * .9} ${y(.36)} L${W} ${y(.44)} L${W} ${H} L0 ${H}Z" fill="${cfg.far}"/>`;
+    // snow caps on far peaks
+    if (cfg.snow) s += `<path d="M${W * .36} ${y(.3)} l-${W * .035} ${H * .04} l${W * .02} -${H * .008} l${W * .015} ${H * .014} l${W * .012} -${H * .012} l${W * .022} ${H * .01}z M${W * .9} ${y(.36)} l-${W * .03} ${H * .035} l${W * .02} -${H * .006} l${W * .025} ${H * .006}z" fill="#F7F3E6" opacity=".85"/>`;
+    s += `<rect y="${y(.3)}" width="${W}" height="${H * .25}" fill="url(#${mist})"/>`;
+    // castle
+    if (cfg.castle) {
+      const cx = W * cfg.castle[0], cy = H * cfg.castle[1], k = cfg.castle[2] || 1;
+      const c = cfg.castleColor || '#C9B89A';
+      s += `<g fill="${c}" opacity=".95">
+        <rect x="${cx - 26 * k}" y="${cy - 30 * k}" width="${52 * k}" height="${30 * k}"/>
+        <rect x="${cx - 8 * k}" y="${cy - 62 * k}" width="${16 * k}" height="${34 * k}"/><path d="M${cx - 11 * k} ${cy - 62 * k}l${11 * k} -${20 * k}l${11 * k} ${20 * k}z"/>
+        <rect x="${cx - 30 * k}" y="${cy - 46 * k}" width="${11 * k}" height="${18 * k}"/><path d="M${cx - 32 * k} ${cy - 46 * k}l${7.5 * k} -${13 * k}l${7.5 * k} ${13 * k}z"/>
+        <rect x="${cx + 19 * k}" y="${cy - 50 * k}" width="${11 * k}" height="${22 * k}"/><path d="M${cx + 17 * k} ${cy - 50 * k}l${7.5 * k} -${14 * k}l${7.5 * k} ${14 * k}z"/>
+      </g>
+      <g fill="#FFF3C4" opacity=".8"><rect x="${cx - 2 * k}" y="${cy - 52 * k}" width="${4 * k}" height="${6 * k}" rx="2"/><rect x="${cx - 14 * k}" y="${cy - 20 * k}" width="${4 * k}" height="${6 * k}" rx="2"/><rect x="${cx + 10 * k}" y="${cy - 20 * k}" width="${4 * k}" height="${6 * k}" rx="2"/></g>`;
+    }
+    // mid hills
+    s += `<path d="M0 ${y(.6)} C${W * .18} ${y(.52)} ${W * .3} ${y(.6)} ${W * .45} ${y(.56)} S${W * .78} ${y(.5)} ${W} ${y(.58)} L${W} ${H} L0 ${H}Z" fill="${cfg.mid}"/>`;
+    // river
+    if (cfg.river) s += `<path d="M${W * .52} ${y(.58)} C${W * .44} ${y(.66)} ${W * .62} ${y(.7)} ${W * .5} ${y(.78)} S${W * .3} ${y(.9)} ${W * .42} ${H}" stroke="${cfg.river}" stroke-width="${W * .05}" fill="none" stroke-linecap="round" opacity=".9"/>`;
+    // near hills
+    s += `<path d="M0 ${y(.72)} C${W * .2} ${y(.66)} ${W * .32} ${y(.74)} ${W * .5} ${y(.72)} S${W * .8} ${y(.66)} ${W} ${y(.7)} L${W} ${H} L0 ${H}Z" fill="${cfg.near}"/>`;
+    // trees
+    if (cfg.trees) {
+      let t = '';
+      const pts = [[.04, .74, 1.3], [.12, .76, 1], [.2, .73, 1.5], [.82, .71, 1.4], [.9, .74, 1.1], [.97, .72, 1.6], [.7, .75, .9]];
+      pts.forEach(([px, py, k]) => {
+        const x = W * px, yy = H * py, s2 = (W / 360) * 22 * k;
+        t += `<path d="M${x} ${yy - s2 * 2.2}l${s2 * .7} ${s2 * 1.1}h-${s2 * .3}l${s2 * .55} ${s2 * .9}h-${s2 * .35}l${s2 * .5} ${s2 * .8}h-${s2 * 2.2}l${s2 * .5} -${s2 * .8}h-${s2 * .35}l${s2 * .55} -${s2 * .9}h-${s2 * .3}z" fill="${cfg.treeColor || '#1E4A33'}"/>`;
+      });
+      s += t;
+    }
+    s += `<path d="M0 ${y(.84)} C${W * .25} ${y(.8)} ${W * .55} ${y(.88)} ${W} ${y(.82)} L${W} ${H} L0 ${H}Z" fill="${cfg.front}"/>`;
+    if (cfg.fire) s += `<circle cx="${W * .5}" cy="${y(.88)}" r="${W * .16}" fill="url(#${sun})" opacity=".8"/><path d="M${W * .5} ${y(.86)}c-6 6-8 10-3 14 1-5 4-6 3-11 4 4 6 7 3 11 6-3 4-9-3-14z" fill="#F2B544"/>`;
+    s += `</svg>`;
+    return s;
+  }
+
+  const dawn = () => mountains(360, 720, {
+    sky: ['#F7E3B0', '#FBEFD2', '#E8EBD3', '#C9DCCB'], sun: [180, 330, 210], far: '#A9C1B0', snow: true, mist: .5,
+    castle: [.7, .43, 1.15], castleColor: '#CDBE9F', mid: '#6F9B73', river: '#BFE0DC', near: '#3F7350', trees: true, front: '#1F4A33'
+  });
+  const valley = () => mountains(360, 140, {
+    sky: ['#F5E6BE', '#E9EEDC'], sun: [250, 90, 90], far: '#AFC6B2', snow: true, mist: .4, mid: '#7BA67B', river: '#BFE0DC', near: '#4E8559', trees: true, front: '#2E6342'
+  });
+  const night = () => mountains(360, 420, {
+    sky: ['#0D1E17', '#1D3A2D', '#3A5A45'], stars: true, moon: [290, 70, 16], far: '#25463A', mid: '#1C3A2C', near: '#14301F', trees: true, treeColor: '#0E2418', front: '#0B1C13', fire: true, sunColor: '#F3C35A'
+  });
+  const glow = () => mountains(360, 300, {
+    sky: ['#0E2018', '#1C3A2B'], stars: true, sun: [180, 150, 140], sunColor: '#E9C766', far: '#1A3528', mid: '#163024', near: '#122A1E', front: '#0F2419'
+  });
+
+  function world(unlocked) {
+    const W = 300, H = 430;
+    const fog = (cx, cy, rx, ry, on) => on ? '' : `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#E9E6DA" opacity=".55"/>`;
+    let trees = '';
+    for (let i = 0; i < 18; i++) {
+      const x = 20 + (i * 29) % 120, y = 40 + ((i * 17) % 70), k = 8 + (i % 3) * 3;
+      trees += `<path d="M${x} ${y - k * 1.8}l${k * .8} ${k * 1.8}h-${k * 1.6}z" fill="${i % 2 ? '#1F5A39' : '#2B7047'}"/>`;
+    }
+    let houses = '';
+    [[200, 232], [222, 244], [240, 228], [214, 220], [252, 248]].forEach(([x, y]) => {
+      houses += `<rect x="${x - 7}" y="${y - 7}" width="14" height="10" fill="#E8D6B0"/><path d="M${x - 9} ${y - 7}l9 -8l9 8z" fill="#B5523F"/><rect x="${x - 2}" y="${y - 2}" width="4" height="5" fill="#F7D98A"/>`;
+    });
+    return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="wl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5E8C5A"/><stop offset=".5" stop-color="#7EA868"/><stop offset="1" stop-color="#9EB66B"/></linearGradient>
+        <radialGradient id="wg"><stop offset="0" stop-color="#F7DE84" stop-opacity=".95"/><stop offset="1" stop-color="#F7DE84" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="${W}" height="${H}" fill="url(#wl)"/>
+      <path d="M0 0h${W}v70c-40 20-60 -10-110 10S60 60 0 80z" fill="#4D7A4F" opacity=".5"/>
+      <!-- mountains -->
+      <path d="M150 120l35-80 22 40 18-28 40 68z" fill="#7E8F86"/><path d="M185 40l-10 24 10-6 8 10 6-10z" fill="#F4F1E6"/><path d="M225 52l-8 16 8-4 6 6 4-6z" fill="#F4F1E6"/>
+      <path d="M130 125l30-40 20 30z" fill="#6C7E74"/>
+      <!-- forest -->
+      ${trees}
+      <!-- river -->
+      <path d="M220 110 C190 150 240 170 200 200 S120 240 150 280 S90 330 100 360 S140 400 120 ${H}" stroke="#9FD3D6" stroke-width="12" fill="none" stroke-linecap="round"/>
+      <path d="M220 110 C190 150 240 170 200 200 S120 240 150 280 S90 330 100 360 S140 400 120 ${H}" stroke="#D6F0EE" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+      <!-- plain -->
+      <ellipse cx="100" cy="190" rx="70" ry="34" fill="#B9C978" opacity=".8"/>
+      <path d="M50 190h100M60 180h80M60 200h80" stroke="#A3B562" stroke-width="2"/>
+      <!-- village -->
+      <ellipse cx="225" cy="238" rx="50" ry="28" fill="#A7BF74" opacity=".8"/>${houses}
+      <!-- lake -->
+      <ellipse cx="78" cy="300" rx="58" ry="32" fill="#7FC2C6"/><ellipse cx="70" cy="294" rx="30" ry="10" fill="#B9E2E2" opacity=".7"/>
+      <!-- land of meaning -->
+      <circle cx="185" cy="370" r="60" fill="url(#wg)"/>
+      <path d="M170 380v-24l15-14 15 14v24z" fill="#EDE0BE"/><path d="M166 356l19-18 19 18z" fill="#C4952B"/><circle cx="185" cy="330" r="3" fill="#FFF3C4"/>
+      ${fog(80, 70, 80, 50, unlocked.includes('forest'))}
+      ${fog(200, 80, 75, 55, unlocked.includes('mountain'))}
+      ${fog(100, 190, 80, 42, unlocked.includes('plain'))}
+      ${fog(225, 238, 62, 38, unlocked.includes('village'))}
+      ${fog(80, 300, 70, 42, unlocked.includes('lake'))}
+      ${fog(185, 368, 70, 52, unlocked.includes('land'))}
+    </svg>`;
+  }
+
+  const icons = {
+    home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>',
+    missions: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>',
+    mirror: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C6.5 4 9.5 4 12 6c2.5-2 5.5-2 8-.5V19c-2.5-1.5-5.5-1.5-8 .5-2.5-2-5.5-2-8-.5z"/><path d="M12 6v13.5"/></svg>',
+    world: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5l6-2.5 6 2.5 6-2.5v13.5l-6 2.5-6-2.5-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>',
+    me: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20c1.2-4 4.2-6 7.5-6s6.3 2 7.5 6"/></svg>',
+    back: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+    close: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+  };
+
+  return { logo, flask, dawn, valley, night, glow, world, icons };
+})();
+
+</script>
+<script>
+/* کیمیاگر — منطق اپ (local-first، بدون نیاز به اینترنت) */
+(function () {
+  'use strict';
+  const D = window.DATA, ART = window.ART;
+  const AB = window.Android || null; // پل بومی اندروید (اعلان‌ها)
+  const KEY = 'daily_actions_v1';
+
+  // ---------- Utilities ----------
+  const nf = new Intl.NumberFormat('fa-IR');
+  const fa = (n) => nf.format(n);
+  const faT = (s) => String(s).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const pad = (n) => String(n).padStart(2, '0');
+  const dayKey = (d) => { d = d || new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+  const today = () => dayKey();
+  const parseDay = (k) => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+  const daysBetween = (a, b) => Math.round((parseDay(b) - parseDay(a)) / 864e5);
+  const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+  const pathOf = (id) => D.paths.find((p) => p.id === id) || D.paths[0];
+  const allMissions = () => D.missions.concat(D.hidden);
+  const missionById = (id) => allMissions().find((m) => m.id === id);
+  const uidGen = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  function hashStr(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  const jalali = (() => { try { return new Intl.DateTimeFormat('fa-IR-u-ca-persian', { weekday: 'long', day: 'numeric', month: 'long' }); } catch (e) { return null; } })();
+  const dayNames = ['ی', 'د', 'س', 'چ', 'پ', 'ج', 'ش']; // index = JS getDay (0=یکشنبه)
+  const dayOrder = [6, 0, 1, 2, 3, 4, 5]; // نمایش از شنبه
+
+  // ---------- State ----------
+  const defaults = () => ({
+    v: 1, onboarded: false, created: today(),
+    name: '', paths: [], dailyMin: 15, intention: '',
+    routines: [], routineLog: {}, micros: [],
+    records: [], insights: [], active: null,
+    day: { date: '', missionId: null, swaps: 0 },
+    seenRegions: ['forest'], lastSeen: today(),
+    settings: { notif: true, mission: true, missionTime: '10:00', morning: true, morningTime: '08:30', quietOn: true, quietStart: '23:30', quietEnd: '07:00', permAsked: false }
+  });
+  let S;
+  try { S = Object.assign(defaults(), JSON.parse(localStorage.getItem(KEY) || '{}')); S.settings = Object.assign(defaults().settings, S.settings || {}); }
+  catch (e) { S = defaults(); }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('ذخیره‌سازی ممکن نشد. فضای دستگاه را بررسی کن.'); } };
+
+  const ui = { tab: 'home', screen: null, params: {}, sheet: null, ob: 0, draft: {}, filter: 'all', mirrorTab: 'finds' };
+
+  // ---------- Derived stats ----------
+  function stats() {
+    let xp = 0, steps = 0;
+    const pathSteps = {}, pathMissions = {}, dayCount = {};
+    D.paths.forEach((p) => { pathSteps[p.id] = 0; pathMissions[p.id] = 0; });
+    const bump = (date, path, n) => { dayCount[date] = (dayCount[date] || 0) + n; if (path) pathSteps[path] = (pathSteps[path] || 0) + n; };
+    Object.keys(S.routineLog).forEach((d) => S.routineLog[d].forEach((r) => { xp += r.xp; steps++; bump(d, r.path, 1); }));
+    S.micros.forEach((m) => { xp += 5; steps++; bump(m.date, null, 1); });
+    S.records.forEach((r) => {
+      xp += r.xp || 0;
+      if (r.status === 'done') { steps++; bump(r.date, r.path, 1); pathMissions[r.path] = (pathMissions[r.path] || 0) + 1; }
+    });
+    const level = Math.floor(Math.sqrt(xp / 40)) + 1;
+    const nextAt = 40 * level * level, prevAt = 40 * (level - 1) * (level - 1);
+    // شعله غیرتنبیهی: یک روز استراحت زنجیره را قطع نمی‌کند
+    const active = Object.keys(dayCount).filter((d) => dayCount[d] > 0).sort().reverse();
+    let flame = 0;
+    if (active.length && daysBetween(active[0], today()) <= 2) {
+      flame = 1;
+      for (let i = 1; i < active.length; i++) { if (daysBetween(active[i], active[i - 1]) <= 2) flame++; else break; }
+    }
+    const savedIns = S.insights.filter((i) => i.saved).length;
+    const crystals = {
+      courage: pathMissions.courage >= 3, streak: flame >= 7, aware: savedIns >= 5,
+      bond: pathMissions.relations >= 3, peace: pathSteps.calm >= 10, meaning: pathMissions.meaning >= 3
+    };
+    const unlocked = D.regions.filter((r) => xp >= r.xp && (pathSteps[r.path] || 0) >= r.steps).map((r) => r.id);
+    return { xp, steps, pathSteps, pathMissions, dayCount, level, nextAt, prevAt, flame, crystals, unlocked, savedIns, lastActive: active[0] || null };
+  }
+  const levelName = (l) => D.levels[Math.min(l - 1, D.levels.length - 1)];
+
+  // ---------- Mission recommendation ----------
+  function hiddenAvailable(st) {
+    return D.hidden.filter((h) => {
+      if (S.records.some((r) => r.mid === h.id && r.status === 'done')) return false;
+      if (h.region === 'forest') return st.savedIns >= 5;
+      return st.unlocked.includes(h.region);
+    });
+  }
+  function targetDifficulty() {
+    const base = S.dailyMin >= 30 ? 2 : S.dailyMin >= 15 ? 2 : 1;
+    const last = S.records.filter((r) => r.status === 'done' || r.status === 'failed').slice(-1)[0];
+    let adj = 0;
+    if (last) {
+      if (last.outcome === 'easier' && last.pre >= 3) adj = 1;
+      if (last.outcome === 'harder' || last.outcome === 'failed') adj = -1;
+    }
+    return Math.max(1, Math.min(3, base + adj));
+  }
+  function pickMission(seedExtra, forcePath, maxD) {
+    const doneIds = new Set(S.records.filter((r) => r.status === 'done').map((r) => r.mid));
+    const r = rng(hashStr(today() + '|' + (seedExtra || 0) + '|' + S.name));
+    const chosen = S.paths.length ? S.paths : ['action'];
+    let path = forcePath;
+    if (!path) {
+      const x = r();
+      if (x < 0.4) path = chosen[0];
+      else if (x < 0.7) path = chosen[1] || chosen[0];
+      else if (x < 0.9) { const rel = D.related[chosen[Math.floor(r() * chosen.length)]]; path = rel[Math.floor(r() * rel.length)]; }
+      else { const others = D.paths.map((p) => p.id).filter((p) => !chosen.includes(p)); path = others.length ? others[Math.floor(r() * others.length)] : chosen[0]; }
+    }
+    const td = maxD || targetDifficulty();
+    const lim = S.dailyMin > 0 ? S.dailyMin : 15;
+    let pool = D.missions.filter((m) => m.path === path && !doneIds.has(m.id) && m.id !== S.day.missionId);
+    if (!pool.length) pool = D.missions.filter((m) => m.path === path && m.id !== S.day.missionId);
+    const fit = pool.filter((m) => m.min <= lim && (maxD ? m.d <= maxD : true));
+    if (fit.length) pool = fit;
+    pool.sort((a, b) => Math.abs(a.d - td) - Math.abs(b.d - td) || a.min - b.min);
+    const best = pool.filter((m) => Math.abs(m.d - td) === Math.abs(pool[0].d - td));
+    return best[Math.floor(r() * best.length)] || D.missions[0];
+  }
+  function ensureToday() {
+    if (S.day.date !== today()) {
+      S.day = { date: today(), missionId: pickMission(0).id, swaps: 0 };
+      save();
+    }
+  }
+  const todayMission = () => missionById(S.day.missionId);
+  const missionDoneToday = () => S.records.some((r) => r.date === today() && r.mid === S.day.missionId && (r.status === 'done' || r.status === 'failed'));
+
+  // ---------- Routines ----------
+  const routineLimit = () => (daysBetween(S.created, today()) >= 7 ? 5 : 3);
+  const doneToday = (rid) => (S.routineLog[today()] || []).some((x) => x.id === rid);
+  const activeRoutines = () => S.routines.filter((r) => r.active);
+  function toggleRoutine(rid) {
+    const r = S.routines.find((x) => x.id === rid); if (!r) return;
+    const k = today(); S.routineLog[k] = S.routineLog[k] || [];
+    if (doneToday(rid)) {
+      S.routineLog[k] = S.routineLog[k].filter((x) => x.id !== rid);
+      toast('برگردانده شد.');
+    } else {
+      const before = stats();
+      S.routineLog[k].push({ id: rid, xp: r.xp, path: r.path, at: Date.now() });
+      const all = activeRoutines().every((x) => doneToday(x.id));
+      toast(all ? '🌟 امروز جهان تو کمی روشن‌تر شد.' : `🧪 یک قدم واقعی دیگر ثبت شد. +${fa(r.xp)} اکسیر`);
+      afterProgress(before);
+    }
+    save(); syncNotifications(); render();
+  }
+
+  // ---------- Notifications (Android bridge) ----------
+  function inQuiet(t) {
+    if (!S.settings.quietOn) return false;
+    const m = toMin(t), s = toMin(S.settings.quietStart), e = toMin(S.settings.quietEnd);
+    return s < e ? (m >= s && m < e) : (m >= s || m < e);
+  }
+  // پل اعلان: (۱) پل بومی Android در APK دست‌ساز، (۲) پلاگین LocalNotifications در نسخه Capacitor
+  const CAP = (window.Capacitor && window.Capacitor.Plugins) || null;
+  const LN = CAP && CAP.LocalNotifications && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() ? CAP.LocalNotifications : null;
+  let capPerm = 'unknown';
+  function notifJobs() {
+    const jobs = [];
+    if (!S.settings.notif) return jobs;
+    const T = 'کیمیاگر';
+    const hm = (t) => t.split(':').map(Number);
+    if (S.settings.morning && !inQuiet(S.settings.morningTime)) { const [h, m] = hm(S.settings.morningTime); jobs.push({ id: 901, h, m, mask: 127, title: T, text: '🌱 امروز فقط یک قدم.', done: false }); }
+    if (S.settings.mission && !inQuiet(S.settings.missionTime)) { const [h, m] = hm(S.settings.missionTime); jobs.push({ id: 900, h, m, mask: 127, title: T, text: '🎯 مأموریت امروزت هنوز منتظر توست.', done: missionDoneToday() }); }
+    // تجمیع: روتین‌هایی با روزهای یکسان که فاصله‌شان کمتر از ۱۵ دقیقه است یک اعلان می‌شوند
+    const list = activeRoutines().filter((r) => r.reminder && r.mask && !inQuiet(r.time)).sort((a, b) => toMin(a.time) - toMin(b.time));
+    const groups = [];
+    list.forEach((r) => {
+      const g = groups.find((g) => g.mask === r.mask && toMin(r.time) - toMin(g.time) < 15);
+      if (g) g.items.push(r); else groups.push({ time: r.time, mask: r.mask, items: [r] });
+    });
+    groups.slice(0, 12).forEach((g, i) => {
+      const [h, m] = hm(g.time);
+      const text = g.items.length === 1 ? (g.items[0].note || ('وقت ' + g.items[0].title + ' است. فقط یک قدم.')) : ('⏰ وقت ' + g.items.map((x) => x.title).join(' و ') + '. فقط یک قدم.');
+      jobs.push({ id: 100 + i, h, m, mask: g.mask, title: T, text, done: g.items.every((x) => doneToday(x.id)) });
+    });
+    return jobs;
+  }
+  let capBusy = null;
+  function syncNotifications() {
+    if (AB) {
+      try {
+        for (let i = 100; i < 120; i++) AB.cancel(i);
+        AB.cancel(900); AB.cancel(901);
+        notifJobs().forEach((j) => { AB.schedule(j.id, j.h, j.m, j.mask, j.title, j.text); AB.setDone(j.id, j.done); });
+      } catch (e) { /* اعلان اختیاری است */ }
+      return;
+    }
+    if (!LN) return;
+    // Capacitor: اعلان‌های یک‌باره برای ۱۴ روز آینده؛ با هر باز شدن اپ و هر تغییر دوباره ساخته می‌شوند
+    const run = async () => {
+      try {
+        const pend = await LN.getPending();
+        if (pend && pend.notifications && pend.notifications.length) await LN.cancel({ notifications: pend.notifications.map((n) => ({ id: n.id })) });
+        const now = new Date(), out = [];
+        notifJobs().forEach((j) => {
+          for (let d = 0; d < 14; d++) {
+            const at = new Date(now.getFullYear(), now.getMonth(), now.getDate() + d, j.h, j.m, 0, 0);
+            if (d === 0 && (at <= now || j.done)) continue;
+            if (!(j.mask & (1 << at.getDay()))) continue;
+            out.push({ id: j.id * 20 + d, title: j.title, body: j.text, schedule: { at, allowWhileIdle: true }, smallIcon: 'ic_stat_kimiagar', iconColor: '#1E5B3E' });
+          }
+        });
+        if (out.length) await LN.schedule({ notifications: out });
+      } catch (e) { /* اعلان اختیاری است */ }
+    };
+    capBusy = (capBusy || Promise.resolve()).then(run);
+  }
+  function refreshCapPerm() {
+    if (!LN) return;
+    LN.checkPermissions().then((r) => { const v = r && r.display === 'granted' ? 'granted' : 'denied'; if (v !== capPerm) { capPerm = v; render(); } }).catch(() => { });
+  }
+  function permState() {
+    if (LN) return capPerm === 'unknown' ? 'denied' : capPerm;
+    if (!AB) return 'web';
+    try { if (AB.sdk() < 33) return 'granted'; return AB.perm() === 0 ? 'granted' : 'denied'; } catch (e) { return 'unknown'; }
+  }
+  function askPermission() {
+    S.settings.permAsked = true; save();
+    if (LN) LN.requestPermissions().then(() => { refreshCapPerm(); syncNotifications(); }).catch(() => { });
+    else if (AB) try { AB.requestPerm(); } catch (e) { }
+    closeSheet();
+    setTimeout(render, 1500);
+  }
+  function exitApp() {
+    if (AB) return AB.exit();
+    if (CAP && CAP.App && CAP.App.exitApp) CAP.App.exitApp();
+  }
+
+  // ---------- Progress & rewards ----------
+  function afterProgress(before) {
+    const after = stats();
+    const newly = after.unlocked.filter((r) => !S.seenRegions.includes(r));
+    if (newly.length) {
+      S.seenRegions = S.seenRegions.concat(newly);
+      const reg = D.regions.find((r) => r.id === newly[0]);
+      setTimeout(() => toast(`🗺️ ${reg.name} باز شد! یک مأموریت مخفی منتظرت است.`, 4200), 1600);
+    }
+    if (after.level > before.level) setTimeout(() => toast(`✨ به سطح ${fa(after.level)} رسیدی: ${levelName(after.level)}`, 3800), 900);
+  }
+
+  // ---------- Insight (پیشنهادی، غیرتشخیصی) ----------
+  function makeInsight(rec, m) {
+    const p = pathOf(m.path).name;
+    if (rec.outcome === 'failed') return 'انجام‌ندادن هم یک داده است، نه شکست. شاید این قدم برای امروز بزرگ بود؛ نسخه کوچک‌ترش را امتحان می‌کنیم.';
+    if (rec.outcome === 'easier' && rec.pre >= 3) return 'به نظر می‌رسد ترس پیش از شروع، از خودِ کار بزرگ‌تر بود. وقتی کارها را کوچک می‌کنی، راحت‌تر از آنچه فکر می‌کنی شروع می‌کنی.';
+    if (rec.outcome === 'easier') return `این قدم در مسیر ${p} برایت روان بود؛ شاید آماده یک قدم کمی بزرگ‌تر باشی.`;
+    if (rec.outcome === 'harder') return `این قدم سخت‌تر از انتظارت بود و باز هم انجامش دادی. شاید به لبه رشدت در مسیر ${p} رسیده‌ای.`;
+    return 'پیش‌بینی‌ات از سختی کار درست بود. به نظر می‌رسد تصویر واقعی‌ای از توان خودت داری.';
+  }
+
+  // ---------- Toast & sheets ----------
+  let toastTimer;
+  function toast(msg, ms) {
+    let el = document.getElementById('toast');
+    if (!el) { el = document.createElement('div'); el.id = 'toast'; el.className = 'toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+    el.textContent = msg; el.style.display = 'block';
+    el.style.bottom = (S.onboarded && !ui.screen) ? '' : '24px';
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.style.display = 'none'; }, ms || 2600);
+  }
+  function openSheet(name, params) { ui.sheet = { name, params: params || {} }; render(); }
+  function closeSheet() { ui.sheet = null; render(); }
+
+  // ---------- Navigation ----------
+  function go(screen, params) { ui.screen = screen; ui.params = params || {}; ui.draft = {}; render(); scrollTop(); }
+  function tab(t) { ui.tab = t; ui.screen = null; render(); scrollTop(); }
+  function scrollTop() { const s = document.querySelector('.screen'); if (s) s.scrollTop = 0; }
+  window.appBack = function () {
+    if (ui.sheet) return closeSheet();
+    if (!S.onboarded) { if (ui.ob > 0 && ui.ob < 7) { ui.ob--; render(); return; } return exitApp(); }
+    if (ui.screen === 'doing') { ui.screen = null; ui.tab = 'home'; render(); return; }
+    if (ui.screen) { ui.screen = null; render(); return; }
+    if (ui.tab !== 'home') return tab('home');
+    exitApp();
+  };
+
+  // ---------- Render ----------
+  const app = document.getElementById('app');
+  function render() {
+    ensureToday();
+    let html = '';
+    if (!S.onboarded) html = renderOnboarding();
+    else if (ui.screen) html = screens[ui.screen]();
+    else html = tabs[ui.tab]() + nav();
+    if (ui.sheet) html += `<div class="overlay" onclick="if(event.target===this)A.closeSheet()"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${sheets[ui.sheet.name](ui.sheet.params)}</div></div>`;
+    const sc = document.querySelector('.screen'); const keep = sc && ui._keepScroll ? sc.scrollTop : 0;
+    app.innerHTML = html;
+    if (keep) { const s2 = document.querySelector('.screen'); if (s2) s2.scrollTop = keep; }
+    ui._keepScroll = false;
+  }
+  const soft = (fn) => (...a) => { ui._keepScroll = true; fn(...a); };
+
+  function nav() {
+    const items = [['home', 'خانه'], ['missions', 'مأموریت‌ها'], ['mirror', 'آینه'], ['world', 'جهان'], ['me', 'من']];
+    return `<nav class="nav" aria-label="ناوبری اصلی">${items.map(([k, t]) => `<button class="${ui.tab === k ? 'on' : ''}" onclick="A.tab('${k}')" aria-label="${t}" ${ui.tab === k ? 'aria-current="page"' : ''}>${ART.icons[k]}<span>${t}</span></button>`).join('')}</nav>`;
+  }
+  const xpTag = (n) => `<span class="xp">${ART.flask()}+${fa(n)}</span>`;
+  const diffDots = (d) => `<span class="diff" aria-label="سختی ${fa(d)} از ۳">${'●'.repeat(d)}${'○'.repeat(3 - d)}</span>`;
+
+  // ---------- Onboarding ----------
+  function obDots(i) { return `<div class="dots" aria-hidden="true">${[1, 2, 3, 4, 5, 6].map((k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div>`; }
+  function renderOnboarding() {
+    const st = ui.ob, d = ui.draft;
+    if (st === 0) return `<div class="screen"><div class="hero fade-in">${'<div class="scene">' + ART.dawn() + '</div>'}
+      <div class="content">${ART.logo(70)}<div class="brand">کیمیاگر</div>
+      <p class="tag">جایی که رشدت را فقط نمی‌خوانی؛<br>زندگی‌اش می‌کنی.</p>
+      <div style="flex:1"></div>
+      <button class="btn light" onclick="A.ob(1)">شروع سفر <span class="arrow">←</span></button>
+      <p class="center small" style="margin-top:10px;color:#E9F0E4">هر روز فقط یک قدم.</p></div></div></div>`;
+    if (st === 1) return `<div class="screen"><div class="ob fade-in">${ART.logo(54)}
+      <h2>دوست داری تو را چه صدا کنیم؟</h2><p class="sub">فقط برای خوشامدگویی؛ روی دستگاه خودت می‌ماند.</p>
+      <div class="body"><input class="field" id="nm" maxlength="24" placeholder="نام یا لقب" value="${esc(S.name)}" oninput="A.setName(this.value)" autocomplete="off"></div>
+      <div class="foot"><button class="btn" id="nmb" onclick="A.ob(2)" ${S.name.trim() ? '' : 'disabled'}>ادامه</button>${obDots(1)}</div></div></div>`;
+    if (st === 2) return `<div class="screen"><div class="ob fade-in">
+      <h2>این روزها دوست داری<br>روی چه چیزی کار کنی؟</h2><p class="sub">حداکثر دو مورد انتخاب کن.</p>
+      <div class="body grid2">${D.paths.map((p) => `<button class="opt ${S.paths.includes(p.id) ? 'sel' : ''}" onclick="A.pickPath('${p.id}')" aria-pressed="${S.paths.includes(p.id)}"><span class="ic">${p.icon}</span><span class="t">${p.name}</span></button>`).join('')}</div>
+      <div class="foot"><button class="btn" onclick="A.ob(3)" ${S.paths.length ? '' : 'disabled'}>ادامه</button>${obDots(2)}</div></div></div>`;
+    if (st === 3) return `<div class="screen"><div class="ob fade-in">
+      <h2>هر روز چقدر<br>برای خودت وقت داری؟</h2>
+      <div class="body stack">${D.timeOptions.map((o) => `<button class="opt optrow ${d.timeSel === o.min ? 'sel' : ''}" style="width:100%" onclick="A.pickTime(${o.min})"><span class="ic">${o.icon}</span><span><span class="t" style="margin:0">${o.title}</span><span class="small muted">${o.sub}</span></span></button>`).join('')}
+      <p class="center small muted">نگران نباش؛ اگر بعضی روزها وقت نداشتی، مسیرت از بین نمی‌رود.</p></div>
+      <div class="foot"><button class="btn" onclick="A.ob(4)" ${d.timeSel == null ? 'disabled' : ''}>ادامه</button>${obDots(3)}</div></div></div>`;
+    if (st === 4) {
+      const sel = d.rsel || [];
+      return `<div class="screen"><div class="ob fade-in">
+      <h2>چه کارهایی را دوست داری<br>به بخشی از روزت تبدیل کنی؟</h2><p class="sub">برای شروع حداکثر ۳ روتین. بعداً می‌توانی تغییرشان بدهی.</p>
+      <div class="body">${D.routineTemplates.map((t) => `<button class="list-opt ${sel.includes(t.key) ? 'sel' : ''}" style="width:100%" onclick="A.pickRoutine('${t.key}')" aria-pressed="${sel.includes(t.key)}"><span class="ic">${t.icon}</span><span class="grow" style="text-align:right">${t.title}</span>${xpTag(t.xp)}<span class="check">✓</span></button>`).join('')}
+      ${(d.custom || []).map((c, i) => `<div class="list-opt sel"><span class="ic">✨</span><span class="grow">${esc(c)}</span>${xpTag(10)}<button class="iconbtn" style="width:32px;height:32px" onclick="A.rmCustom(${i})" aria-label="حذف">${ART.icons.close}</button></div>`).join('')}
+      <button class="btn soft" style="margin-top:12px" onclick="A.openSheet('custom')">+ روتین خودم را اضافه می‌کنم</button></div>
+      <div class="foot"><button class="btn" onclick="A.ob(5)">${sel.length + (d.custom || []).length ? 'ادامه' : 'فعلاً بدون روتین'}</button>${obDots(4)}</div></div></div>`;
+    }
+    if (st === 5) return `<div class="screen"><div class="ob fade-in">
+      <h2>نیت ۳۰ روزه</h2><p class="sub" style="font-size:14px;margin-top:10px">اگر ۳۰ روز دیگر به امروز نگاه کنی،<br>دوست داری چه چیزی در زندگی‌ات متفاوت شده باشد؟</p>
+      <div class="body"><textarea class="field" rows="5" maxlength="300" placeholder="مثلاً: آرام‌تر واکنش نشان بدهم و هر روز کمی ورزش کنم." oninput="A.setIntent(this.value)">${esc(S.intention)}</textarea>
+      <p class="small muted" style="margin-top:8px">این متن فقط روی دستگاه خودت ذخیره می‌شود و بعداً در «من» قابل ویرایش است.</p></div>
+      <div class="foot"><button class="btn" id="itb" onclick="A.ob(6)">${S.intention.trim() ? 'ادامه' : 'رد شدن'}</button>${obDots(5)}</div></div></div>`;
+    if (st === 6) return `<div class="screen dark"><div class="ob fade-in" style="text-align:center">
+      <p class="small" style="color:var(--gold2)">یک قانون کیمیاگر</p>
+      <h2 style="font-size:26px">دانستن کافی نیست.</h2>
+      <div class="flow">
+        <div class="node"><div class="orb">🧠</div><div class="lbl2">فکر<small>دانستن</small></div></div><div class="down">↓</div>
+        <div class="node"><div class="orb">🌿</div><div class="lbl2">اقدام<small>تجربه</small></div></div><div class="down">↓</div>
+        <div class="node"><div class="orb">⭐</div><div class="lbl2">تغییر<small>رشد</small></div></div>
+      </div>
+      <p style="margin-top:14px;line-height:2">اینجا قرار نیست فقط درباره رشد بخوانی؛<br>هر روز یک چیز را در زندگی واقعی امتحان می‌کنی<br>و بیشتر پاداش‌ها را برای همین می‌گیری.</p>
+      <div style="flex:1"></div>
+      <button class="btn light" onclick="A.finishOnboarding()">فهمیدم، بریم! <span class="arrow">←</span></button>${obDots(6)}</div></div>`;
+    return '';
+  }
+
+  // ---------- Tabs ----------
+  const tabs = {};
+  tabs.home = function () {
+    const st = stats(), m = todayMission(), mdone = missionDoneToday();
+    const routines = activeRoutines(); const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+    const away = st.lastActive && daysBetween(st.lastActive, today()) >= 3;
+    const act = S.active ? missionById(S.active.mid) : null;
+    const perm = permState();
+    return `<div class="screen with-nav fade-in">
+      <div class="head row between"><div><h1>سلام ${esc(S.name)} 👋</h1><p class="muted" style="margin-top:-2px">امروز فقط یک قدم.</p></div>
+      <div class="date">${jalali ? jalali.format(new Date()) : ''}</div></div>
+      <div class="pad" style="padding-top:8px">
+      ${away ? `<div class="note" style="margin-bottom:12px">برگشتی. همین کافی است. لازم نیست چیزی را جبران کنی. 🌱</div>` : ''}
+      ${act ? `<div class="card tight row" style="margin-bottom:12px;border-color:var(--gold2)"><span style="font-size:24px">⏳</span><div class="grow"><b class="small">مأموریت در جریان</b><div class="small muted">${esc(act.title)}</div></div><button class="btn sm" onclick="A.go('doing')">برگشتم</button></div>` : ''}
+      ${S.onboarded && perm === 'denied' && !S.settings.permAsked && routines.some((r) => r.reminder) ? `<button class="card tight row" style="width:100%;margin-bottom:12px;text-align:right" onclick="A.openSheet('perm')"><span style="font-size:22px">🔔</span><span class="grow small">یادآوری‌ها هنوز فعال نیستند. <b class="gold">فعال‌سازی</b></span></button>` : ''}
+
+      <div class="section-title" style="margin-top:4px">مأموریت امروز ${mdone ? '<span class="chip">✓ ثبت شد</span>' : ''}</div>
+      <div class="mission-hero"><div class="top">${ART.valley()}<div class="badge">${pathOf(m.path).icon}</div></div>
+        <div class="inner"><span class="chip">${pathOf(m.path).name}${m.hidden ? ' · مخفی' : ''}</span><h3 style="margin-top:6px">${esc(m.title)}</h3>
+        <p class="small muted" style="margin-top:4px">${esc(m.act)}</p>
+        <div class="meta3"><div>مهارت<b>${pathOf(m.path).name}</b></div><div>زمان<b>${fa(m.min)} دقیقه</b></div><div>پاداش<b class="gold">${fa(m.xp)} اکسیر</b></div></div>
+        ${mdone ? `<button class="btn soft" onclick="A.tab('mirror')">دیدن بازتاب در آینه</button>` : `<button class="btn" onclick="A.go('mission',{id:'${m.id}'})">شروع مأموریت</button>
+        ${S.day.swaps < 1 ? `<button class="link" style="margin-top:4px" onclick="A.swap()">مأموریت دیگری می‌خواهم</button>` : ''}`}
+        </div></div>
+      ${hiddenAvailable(st).length && !m.hidden ? `<button class="card tight row" style="width:100%;margin-top:10px;text-align:right;border-color:var(--gold2)" onclick="A.go('mission',{id:'${hiddenAvailable(st)[0].id}'})"><span style="font-size:22px">🗝️</span><span class="grow small"><b>مأموریت مخفی باز شد:</b> ${esc(hiddenAvailable(st)[0].title)}<br><span class="muted">اختیاری است</span></span></button>` : ''}
+
+      <div class="section-title">روتین‌های امروز <button class="link" onclick="A.openSheet('routines')">مدیریت</button></div>
+      ${routines.length ? `<div class="card" style="padding:4px 0">${routines.map((r) => {
+        const done = doneToday(r.id), late = !done && r.reminder && toMin(r.time) < nowMin;
+        return `<div class="rt ${done ? 'done' : ''}"><span class="ic">${r.icon}</span><div class="grow"><div class="t">${esc(r.title)}</div><div class="tiny muted">${r.reminder ? '⏰ ' + faT(r.time) : 'بدون یادآوری'}${late ? ' · هنوز برای یک قدم کوچک وقت هست.' : ''}</div></div>${xpTag(r.xp)}
+        <button class="tick" onclick="A.toggleRoutine('${r.id}')" role="checkbox" aria-checked="${done}" aria-label="${esc(r.title)}"><span class="check ${done ? 'on' : ''}">✓</span></button></div>`;
+      }).join('')}</div>` : `<div class="card empty"><span class="ic">🌿</span>هنوز روتینی نداری.<br><button class="link" onclick="A.openSheet('editRoutine',{})">+ افزودن اولین روتین</button></div>`}
+
+      <div class="section-title">وضعیت رشد</div>
+      <div class="stats">
+        <div class="stat"><span class="v gold">${fa(st.xp)}</span><span class="k">اکسیر</span></div>
+        <div class="stat"><span class="v">🔥 ${fa(st.flame)}</span><span class="k">شعله</span></div>
+        <div class="stat"><span class="v">${fa(st.steps)}</span><span class="k">قدم واقعی</span></div>
+      </div>
+
+      <div class="section-title">جهان من</div>
+      <button class="world-preview" onclick="A.tab('world')" aria-label="ورود به جهان">${ART.world(st.unlocked)}<span class="lbl3">${fa(st.unlocked.length)} از ${fa(D.regions.length)} منطقه باز</span><span class="cta">ورود به جهان ←</span></button>
+
+      <div style="margin-top:16px"><button class="micro-btn" onclick="A.openSheet('micro')"><span class="ic">🍃</span><span class="grow"><b>امروز فقط همین</b><br><span class="small muted">انرژی کمی داری؟ یک اقدام ۲ تا ۵ دقیقه‌ای بگیر.</span></span><span class="arrow">←</span></button></div>
+      </div></div>`;
+  };
+
+  tabs.missions = function () {
+    const done = new Set(S.records.filter((r) => r.status === 'done').map((r) => r.mid));
+    const st = stats(), hid = hiddenAvailable(st);
+    let list = D.missions.filter((m) => ui.filter === 'all' || m.path === ui.filter);
+    if (ui.filter === 'all') list = hid.concat(list); else list = hid.filter((h) => h.path === ui.filter).concat(list);
+    return `<div class="screen with-nav fade-in"><div class="head"><h1>مأموریت‌ها</h1><p class="muted small">هر مأموریت یک اقدام واقعی در زندگی توست.</p></div>
+      <div class="pad" style="padding-top:8px">
+      <div class="filter"><button class="${ui.filter === 'all' ? 'on' : ''}" onclick="A.setFilter('all')">همه</button>${D.paths.map((p) => `<button class="${ui.filter === p.id ? 'on' : ''}" onclick="A.setFilter('${p.id}')">${p.icon} ${p.name}</button>`).join('')}</div>
+      <div style="margin-top:10px">${list.map((m) => {
+        const p = pathOf(m.path);
+        return `<button class="card mcard" onclick="A.go('mission',{id:'${m.id}'})"><span class="ic" style="background:${p.color}1F">${m.hidden ? '🗝️' : p.icon}</span>
+        <span class="grow"><span class="row between"><h4>${esc(m.title)}</h4>${done.has(m.id) ? '<span class="donebadge">✓ انجام‌شده</span>' : xpTag(m.xp)}</span>
+        <span class="small muted" style="display:block">${p.name} · ${fa(m.min)} دقیقه · ${diffDots(m.d)}${m.hidden ? ' · <b class="gold">مخفی</b>' : ''}</span></span></button>`;
+      }).join('')}</div></div></div>`;
+  };
+
+  tabs.mirror = function () {
+    const st = stats(), weekAgo = dayKey(new Date(Date.now() - 6 * 864e5));
+    const wk = S.records.filter((r) => r.date >= weekAgo && r.status === 'done');
+    const wkSaved = S.insights.filter((i) => i.saved && i.date >= weekAgo).length;
+    const t = ui.mirrorTab;
+    let body = '';
+    if (t === 'finds') {
+      const saved = S.insights.filter((i) => i.saved).slice().reverse();
+      body = saved.length ? saved.map((i) => `<div class="card ins" style="margin-top:10px"><span class="q">${pathOf(i.path).icon}</span><div class="grow"><p style="font-size:14px">${esc(i.text)}</p><p class="tiny muted" style="margin-top:4px">${esc(i.src)} · ${faT(i.date.replace(/-/g, '/'))}</p></div><button class="iconbtn" style="width:36px;height:36px;color:var(--muted)" aria-label="حذف کشف" onclick="A.unsave('${i.id}')">${ART.icons.close}</button></div>`).join('')
+        : `<div class="card empty" style="margin-top:10px"><span class="ic">🪞</span>هنوز کشفی ذخیره نکرده‌ای.<br>بعد از هر مأموریت می‌توانی آنچه فهمیدی را اینجا نگه داری.</div>`;
+    } else if (t === 'patterns') {
+      const fin = S.records.filter((r) => r.status === 'done' || r.status === 'failed');
+      const easier = fin.filter((r) => r.outcome === 'easier').length;
+      const feel = {}; fin.forEach((r) => { if (r.feeling) feel[r.feeling] = (feel[r.feeling] || 0) + 1; });
+      const topF = Object.keys(feel).sort((a, b) => feel[b] - feel[a])[0];
+      const fobj = D.feelings.find((f) => f.id === topF);
+      const maxS = Math.max(1, ...Object.values(st.pathSteps));
+      body = fin.length < 2 ? `<div class="card empty" style="margin-top:10px"><span class="ic">🧭</span>برای دیدن الگوها حداقل دو مأموریت را ثبت کن.<br><span class="tiny">الگوها مشاهده‌ی رفتار تو هستند، نه برچسب شخصیتی.</span></div>` :
+        `<div class="card" style="margin-top:10px"><p class="bold small">ترس پیش‌بینی‌شده در برابر واقعیت</p><p style="margin-top:4px">${fa(Math.round(100 * easier / fin.length))}٪ مأموریت‌ها <b>راحت‌تر از انتظارت</b> بوده‌اند.</p></div>
+        ${fobj ? `<div class="card" style="margin-top:10px"><p class="bold small">حس پرتکرار بعد از اقدام</p><p style="margin-top:4px;font-size:18px">${fobj.e} ${fobj.t}</p></div>` : ''}
+        <div class="card" style="margin-top:10px"><p class="bold small" style="margin-bottom:8px">قدم‌های واقعی در هر مسیر</p>${D.paths.map((p) => `<div class="row" style="margin-top:6px"><span class="small" style="width:72px">${p.name}</span><div class="bar grow"><i style="width:${100 * (st.pathSteps[p.id] || 0) / maxS}%;background:${p.color}"></i></div><span class="tiny muted" style="width:26px;text-align:left">${fa(st.pathSteps[p.id] || 0)}</span></div>`).join('')}</div>`;
+    } else {
+      const recs = S.records.slice().reverse();
+      body = recs.length ? recs.map((r) => {
+        const m = missionById(r.mid) || { title: r.title || 'مأموریت', path: r.path };
+        const o = D.outcomes.find((x) => x.id === r.outcome);
+        const f = D.feelings.find((x) => x.id === r.feeling);
+        return `<div class="card" style="margin-top:10px"><div class="row between"><b class="small">${pathOf(m.path).icon} ${esc(m.title)}</b><span class="tiny muted">${faT(r.date.replace(/-/g, '/'))}</span></div>
+        <p class="small muted" style="margin-top:2px">${r.status === 'abandoned' ? 'بسته شد بدون ثبت نتیجه' : (o ? o.t : '')}${f ? ' · ' + f.e + ' ' + f.t : ''}${r.pre ? ' · سختی پیش‌بینی‌شده ' + fa(r.pre) : ''}</p>
+        ${r.reflection ? `<p class="small" style="margin-top:6px">«${esc(r.reflection)}»</p>` : ''}</div>`;
+      }).join('') : `<div class="card empty" style="margin-top:10px"><span class="ic">📓</span>هنوز تجربه‌ای ثبت نشده.</div>`;
+    }
+    return `<div class="screen with-nav fade-in"><div class="head"><h1>آینه من</h1><p class="muted small">کشف‌ها و بازتاب‌های تو؛ فقط روی همین دستگاه.</p></div>
+      <div class="pad" style="padding-top:8px">
+      <div class="tabs" role="tablist"><button class="${t === 'finds' ? 'on' : ''}" onclick="A.mtab('finds')">کشف‌ها</button><button class="${t === 'patterns' ? 'on' : ''}" onclick="A.mtab('patterns')">الگوها</button><button class="${t === 'log' ? 'on' : ''}" onclick="A.mtab('log')">تجربه‌ها</button></div>
+      <div class="card" style="margin-top:12px"><p class="bold small center">این هفته</p><div class="weekbox" style="margin-top:6px">
+        <div><div class="v">🎯 ${fa(wk.length)}</div><div class="tiny muted">اقدام</div></div>
+        <div><div class="v">🦁 ${fa(wk.filter((r) => r.path === 'courage').length)}</div><div class="tiny muted">شجاعت</div></div>
+        <div><div class="v">💡 ${fa(wkSaved)}</div><div class="tiny muted">کشف</div></div></div></div>
+      ${body}</div></div>`;
+  };
+
+  tabs.world = function () {
+    const st = stats();
+    return `<div class="screen with-nav fade-in"><div class="head"><h1>جهان من</h1><p class="muted small">هر منطقه با اکسیر و اقدام واقعی در همان مسیر باز می‌شود.</p></div>
+      <div class="pad" style="padding-top:8px"><div class="worldmap">${ART.world(st.unlocked)}
+      ${D.regions.map((r) => {
+        const open = st.unlocked.includes(r.id), p = pathOf(r.path);
+        const need = [];
+        if (!open) { if (st.xp < r.xp) need.push(fa(r.xp) + ' اکسیر'); const s = st.pathSteps[r.path] || 0; if (s < r.steps) need.push(fa(r.steps - s) + ' قدم'); }
+        return `<button class="pin ${open ? '' : 'locked'}" style="left:${r.x}%;top:${r.y}%" onclick="A.openSheet('region',{id:'${r.id}'})" aria-label="${r.name}${open ? ' (باز)' : ' (قفل)'}"><span class="o">${open ? p.icon : '🔒'}</span><span class="n">${r.name}</span>${open ? '' : `<span class="req">${need.join(' + ')}</span>`}</button>`;
+      }).join('')}</div>
+      <p class="small muted center" style="margin-top:12px">${fa(st.unlocked.length)} از ${fa(D.regions.length)} منطقه باز شده است.</p></div></div>`;
+  };
+
+  tabs.me = function () {
+    const st = stats(), prog = Math.round(100 * (st.xp - st.prevAt) / Math.max(1, st.nextAt - st.prevAt));
+    const maxS = Math.max(1, ...Object.values(st.pathSteps));
+    const nCry = Object.values(st.crystals).filter(Boolean).length;
+    return `<div class="screen with-nav fade-in"><div class="dark" style="padding:26px 18px 54px;text-align:center;border-radius:0 0 28px 28px">
+      <div class="avatar">${pathOf(S.paths[0] || 'action').icon}</div>
+      <h2 style="margin-top:10px;font-size:20px">${esc(S.name)}</h2><p style="color:var(--gold2)">سطح ${fa(st.level)} · ${levelName(st.level)}</p>
+      <div class="bar" style="margin:8px auto 0;max-width:220px;background:rgba(255,255,255,.15)"><i style="width:${prog}%;background:var(--gold2)"></i></div>
+      <p class="tiny" style="margin-top:4px;opacity:.75">${fa(st.nextAt - st.xp)} اکسیر تا سطح بعد</p></div>
+      <div class="pad" style="margin-top:-44px">
+      <div class="card"><div class="stats" style="gap:0"><div class="center"><span class="bold gold" style="font-size:20px">${fa(st.xp)}</span><div class="tiny muted">اکسیر</div></div><div class="center"><span class="bold" style="font-size:20px">${fa(st.steps)}</span><div class="tiny muted">قدم واقعی</div></div><div class="center"><span class="bold" style="font-size:20px">🔥 ${fa(st.flame)}</span><div class="tiny muted">شعله</div></div></div></div>
+      <div class="section-title">کریستال‌ها <button class="link" onclick="A.openSheet('crystals')">مشاهده همه</button></div>
+      <div class="card"><div class="crys">${D.crystals.map((c) => `<div class="${st.crystals[c.id] ? 'on' : ''}" title="${c.name}" aria-label="${c.name}${st.crystals[c.id] ? ' به‌دست‌آمده' : ' قفل'}">${c.icon}</div>`).join('')}</div><p class="tiny muted center" style="margin-top:6px">${fa(nCry)} از ${fa(D.crystals.length)} کریستال</p></div>
+      <div class="section-title">مسیرهای من</div>
+      <div class="card">${D.paths.map((p) => `<div class="row" style="margin-top:6px"><span class="small" style="width:72px">${p.icon} ${p.name}</span><div class="bar grow"><i style="width:${100 * (st.pathSteps[p.id] || 0) / maxS}%;background:${p.color}"></i></div><span class="tiny muted" style="width:26px;text-align:left">${fa(st.pathSteps[p.id] || 0)}</span></div>`).join('')}</div>
+      <div class="section-title">نیت ۳۰ روزه <button class="link" onclick="A.openSheet('intent')">ویرایش</button></div>
+      <div class="card small">${S.intention ? esc(S.intention) : '<span class="muted">هنوز نیتی ننوشته‌ای.</span>'}</div>
+      <div class="section-title">تنظیمات</div>
+      <div class="card" style="padding:0 14px">
+        <button class="setrow" style="width:100%" onclick="A.openSheet('routines')"><span>🔁</span><span class="grow" style="text-align:right">مدیریت روتین‌ها</span><span class="muted">←</span></button>
+        <button class="setrow" style="width:100%" onclick="A.openSheet('notif')"><span>🔔</span><span class="grow" style="text-align:right">اعلان‌ها و ساعت سکوت</span><span class="muted">←</span></button>
+        <button class="setrow" style="width:100%" onclick="A.openSheet('profile')"><span>✏️</span><span class="grow" style="text-align:right">نام و مسیرها</span><span class="muted">←</span></button>
+        <button class="setrow" style="width:100%" onclick="A.openSheet('privacy')"><span>🔒</span><span class="grow" style="text-align:right">حریم خصوصی و پشتیبان</span><span class="muted">←</span></button>
+      </div>
+      <p class="tiny muted center" style="margin-top:16px">کیمیاگر · نسخه ۱٫۲ (MVP)</p></div></div>`;
+  };
+
+  // ---------- Full screens ----------
+  const screens = {};
+  screens.mission = function () {
+    const m = missionById(ui.params.id), p = pathOf(m.path);
+    const busy = S.active && S.active.mid !== m.id;
+    return `<div class="screen fade-in"><div style="position:relative;height:170px">${ART.valley()}<div style="position:absolute;inset:0" class="topbar"><button class="iconbtn" style="background:rgba(255,251,242,.85);align-self:flex-start" onclick="A.back()" aria-label="بازگشت">${ART.icons.back}</button></div>
+      <div class="badge" style="position:absolute;bottom:-28px;right:50%;transform:translateX(50%);width:64px;height:64px;border-radius:50%;background:var(--paper);border:2px solid var(--gold2);display:grid;place-items:center;font-size:32px;box-shadow:var(--shadow)">${m.hidden ? '🗝️' : p.icon}</div></div>
+      <div class="pad" style="padding-top:38px"><div class="center"><span class="chip">${p.name} · ${diffDots(m.d)}</span>${m.hidden ? ' <span class="chip gold">مأموریت مخفی · اختیاری</span>' : ''}<h2 style="font-size:21px;margin-top:8px">${esc(m.title)}</h2></div>
+      <div class="stack" style="margin-top:16px">
+        <div class="block"><h5>چرا این قدم؟</h5><p class="small">${esc(m.why)}</p></div>
+        <div class="block" style="border-color:#BFD6B9;background:#F3F8EE"><h5>اقدام واقعی</h5><p>${esc(m.act)}</p></div>
+        <div class="meta3" style="background:var(--paper);border-radius:16px;border:1px solid var(--line)"><div>مهارت<b>${p.name}</b></div><div>زمان تقریبی<b>${fa(m.min)} دقیقه</b></div><div>پاداش<b class="gold">${fa(m.xp)} اکسیر</b></div></div>
+      </div>
+      <div style="margin-top:20px">${busy ? `<div class="warn" style="margin-bottom:10px">یک مأموریت دیگر در جریان است. اول نتیجه آن را ثبت کن یا ببندش.</div><button class="btn" onclick="A.go('doing')">رفتن به مأموریت در جریان</button>` :
+        `<button class="btn" onclick="A.startMission('${m.id}')">${S.active ? 'ادامه مأموریت' : 'شروع مأموریت'}</button>`}</div></div></div>`;
+  };
+
+  screens.doing = function () {
+    if (!S.active) { ui.screen = null; return tabs.home() + nav(); }
+    const m = missionById(S.active.mid);
+    const total = m.min * 60, elapsed = Math.floor((Date.now() - S.active.startedAt) / 1000), left = Math.max(0, total - elapsed);
+    const C = 2 * Math.PI * 76, frac = left / total;
+    setTimeout(tickTimer, 1000);
+    return `<div class="screen fade-in" style="background:var(--paper)"><div style="position:relative;height:250px">${ART.night()}
+      <button class="iconbtn" style="position:absolute;top:14px;right:14px;color:#fff" onclick="A.back()" aria-label="بازگشت به خانه">${ART.icons.back}</button></div>
+      <div class="pad center" style="margin-top:-30px;background:var(--paper);border-radius:28px 28px 0 0;position:relative">
+      <h2 style="font-size:20px">حالا گوشی را کنار بگذار.</h2>
+      <p class="muted" style="margin-top:6px">مأموریتت در دنیای واقعی اتفاق می‌افتد.<br><b style="color:var(--ink)">${esc(m.title)}</b></p>
+      <div class="timer-ring" aria-live="polite"><svg viewBox="0 0 170 170"><circle cx="85" cy="85" r="76" fill="none" stroke="#EDE4CF" stroke-width="9"/><circle id="ring" cx="85" cy="85" r="76" fill="none" stroke="#2A7650" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - frac)}"/></svg><div class="val" id="tval">${fmtClock(left)}</div></div>
+      <p class="small muted">🌿 وقتی برگشتی، اینجا منتظرت هستیم.</p>
+      <button class="btn" style="margin-top:18px" onclick="A.go('result')">برگشتم</button>
+      <button class="link" style="margin-top:6px;color:var(--muted)" onclick="A.openSheet('abandon')">فعلاً نمی‌توانم؛ بستن مأموریت</button>
+      <p class="tiny muted" style="margin-top:10px">زندگی واقعی، بهترین تمرین است!</p></div></div>`;
+  };
+  function fmtClock(s) { return faT(pad(Math.floor(s / 60)) + ':' + pad(s % 60)); }
+  function tickTimer() {
+    if (ui.screen !== 'doing' || !S.active) return;
+    const m = missionById(S.active.mid), total = m.min * 60, left = Math.max(0, total - Math.floor((Date.now() - S.active.startedAt) / 1000));
+    const el = document.getElementById('tval'), ring = document.getElementById('ring');
+    if (el) el.textContent = left ? fmtClock(left) : '✓';
+    if (ring) { const C = 2 * Math.PI * 76; ring.setAttribute('stroke-dashoffset', C * (1 - left / total)); }
+    if (left > 0) setTimeout(tickTimer, 1000);
+  }
+
+  screens.result = function () {
+    const m = missionById(S.active ? S.active.mid : ui.params.id), d = ui.draft;
+    const ok = d.outcome && d.pre && (d.outcome === 'failed' || d.feeling);
+    return `<div class="screen fade-in"><div class="topbar"><button class="iconbtn" onclick="A.back()" aria-label="بازگشت">${ART.icons.back}</button><b>ثبت تجربه</b><span style="width:44px"></span></div>
+      <div class="pad stack" style="padding-top:6px">
+      <p class="center muted small">${esc(m.title)}</p>
+      <div class="card"><p class="bold">چه اتفاقی افتاد؟</p><div class="outcome" style="margin-top:10px">${D.outcomes.map((o) => `<button class="${d.outcome === o.id ? 'on' : ''}" onclick="A.draft('outcome','${o.id}')">${o.t}</button>`).join('')}</div></div>
+      <div class="card"><p class="bold">قبل از انجام، چقدر سخت به نظر می‌رسید؟</p><div class="row between tiny muted" style="margin-top:6px"><span>خیلی آسان</span><span>خیلی سخت</span></div>
+        <div class="scale" style="margin-top:4px">${[1, 2, 3, 4, 5].map((n) => `<button class="${d.pre === n ? 'on' : ''}" onclick="A.draft('pre',${n})">${fa(n)}</button>`).join('')}</div></div>
+      ${d.outcome !== 'failed' ? `<div class="card"><p class="bold">حالا چه حسی داری؟</p><div class="feel" style="margin-top:8px">${D.feelings.map((f) => `<button class="${d.feeling === f.id ? 'on' : ''}" onclick="A.draft('feeling','${f.id}')" aria-label="${f.t}"><span>${f.e}</span>${f.t}</button>`).join('')}</div></div>` : ''}
+      <div class="card"><p class="bold">چه چیزی فهمیدی؟ <span class="muted small">(اختیاری · ۵+ اکسیر)</span></p><textarea class="field" style="margin-top:8px" rows="3" maxlength="400" placeholder="یک جمله کافی است." oninput="A.draftText(this.value)">${esc(d.reflection || '')}</textarea></div>
+      <button class="btn" onclick="A.submitResult()" ${ok ? '' : 'disabled'}>ثبت تجربه</button>
+      </div></div>`;
+  };
+
+  screens.success = function () {
+    const rec = S.records.find((r) => r.uid === ui.params.uid), m = missionById(rec.mid);
+    const ins = S.insights.find((i) => i.uid === rec.uid);
+    const failed = rec.status === 'failed';
+    return `<div class="screen dark fade-in"><div style="position:absolute;inset:0;height:300px">${ART.glow()}</div><div class="pad reward" style="position:relative">
+      <h2 style="font-size:22px">${failed ? 'ثبت شد؛ بدون هیچ جریمه‌ای.' : (S.records.filter((r) => r.status === 'done').length === 1 ? 'اولین قدم برداشته شد! ✨' : 'یک قدم واقعی دیگر! ✨')}</h2>
+      <div class="glow">${ART.logo(92)}</div>
+      <div class="amt">+${fa(rec.xp)}</div><p style="color:var(--gold2)">اکسیر</p>
+      ${ins ? `<div class="insight"><p class="small" style="color:var(--gold2)">💡 بازتاب پیشنهادی</p><p style="margin-top:4px">${esc(ins.text)}</p>
+        <p class="tiny" style="opacity:.6;margin-top:6px">این یک مشاهده است، نه تشخیص یا برچسب.</p>
+        ${ins.saved ? '<p class="small" style="margin-top:10px;color:#BFE3C8">✓ در آینه ذخیره شد</p>' : `<button class="btn light sm" style="margin-top:10px" onclick="A.saveInsight('${ins.id}')">ذخیره در آینه من</button>`}</div>` : ''}
+      ${failed ? `<div class="stack" style="margin-top:18px"><button class="btn light" onclick="A.smaller('${m.path}')">یک نسخه کوچک‌تر بده</button><button class="link" style="color:#E9F0E4" onclick="A.finish()">بعداً امتحان می‌کنم</button></div>`
+        : `<button class="btn light" style="margin-top:22px" onclick="A.finish()">ادامه <span class="arrow">←</span></button>`}
+      </div></div>`;
+  };
+
+  // ---------- Sheets ----------
+  const sheets = {};
+  sheets.custom = () => `<h3>روتین شخصی</h3><label class="lbl">عنوان</label><input class="field" id="cr" maxlength="30" placeholder="مثلاً: ۱۰ دقیقه زبان انگلیسی"><button class="btn" style="margin-top:14px" onclick="A.addCustom()">افزودن</button>`;
+  sheets.micro = function () {
+    const r = rng(hashStr(today() + S.micros.length + (ui.draft.mr || 0)));
+    const txt = D.micro[Math.floor(r() * D.micro.length)];
+    const n = S.micros.filter((x) => x.date === today()).length;
+    return `<div class="center"><span style="font-size:40px">🍃</span><h3 style="margin-top:4px">امروز فقط همین</h3><p class="muted small">یک اقدام کوچک هم یک قدم واقعی است.</p>
+      <div class="card" style="margin-top:14px;font-size:17px;font-weight:700">${esc(txt)}</div>
+      ${n >= 3 ? '<p class="small muted" style="margin-top:10px">امروز سه قدم کوچک برداشتی؛ همین عالی است. پاداش اقدام کوچک روزی تا سه بار است.</p>' : ''}
+      <button class="btn" style="margin-top:14px" onclick="A.microDone()" ${n >= 3 ? 'disabled' : ''}>انجام دادم <span class="xp" style="color:#F4D77A">+۵</span></button>
+      <button class="link" style="margin-top:6px" onclick="A.microNext()">یک پیشنهاد دیگر</button></div>`;
+  };
+  sheets.routines = function () {
+    const lim = routineLimit(), nAct = activeRoutines().length;
+    return `<h3>مدیریت روتین‌ها</h3><p class="small muted">${fa(nAct)} از ${fa(lim)} روتین فعال${lim === 3 ? ' (بعد از هفته اول تا ۵ روتین)' : ''}</p>
+      <div class="card" style="padding:4px 0;margin-top:10px">${S.routines.length ? S.routines.map((r) => `<button class="rt" style="width:100%;text-align:right" onclick="A.openSheet('editRoutine',{id:'${r.id}'})"><span class="ic">${r.icon}</span><span class="grow"><span class="t" style="display:block">${esc(r.title)}</span><span class="tiny muted">${r.active ? (r.reminder ? '⏰ ' + faT(r.time) + ' · ' + daysLabel(r.mask) : 'بدون یادآوری') : '⏸ متوقف'}</span></span><span class="muted">ویرایش</span></button>`).join('') : '<div class="empty">روتینی نداری.</div>'}</div>
+      <button class="btn soft" style="margin-top:12px" onclick="A.openSheet('editRoutine',{})">+ روتین جدید</button>`;
+  };
+  function daysLabel(mask) { if (mask === 127) return 'هر روز'; return dayOrder.filter((d) => mask & (1 << d)).map((d) => dayNames[d]).join('، ') || 'هیچ روز'; }
+  sheets.editRoutine = function (p) {
+    const r = p.id ? S.routines.find((x) => x.id === p.id) : null;
+    const d = ui.draft.er || (ui.draft.er = r ? Object.assign({}, r) : { title: '', icon: '✨', xp: 10, path: 'action', time: '20:00', mask: 127, reminder: true, note: '', active: true });
+    const tpl = !r ? `<label class="lbl">انتخاب سریع</label><div class="filter">${D.routineTemplates.map((t) => `<button onclick="A.erTpl('${t.key}')">${t.icon} ${t.title}</button>`).join('')}</div>` : '';
+    return `<h3>${r ? 'ویرایش روتین' : 'روتین جدید'}</h3>${tpl}
+      <label class="lbl">عنوان</label><input class="field" maxlength="30" value="${esc(d.title)}" oninput="A.er('title',this.value)" placeholder="عنوان روتین">
+      <div class="setrow" style="margin-top:6px"><span class="grow bold small">یادآوری</span><button class="switch ${d.reminder ? 'on' : ''}" role="switch" aria-checked="${d.reminder}" aria-label="یادآوری" onclick="A.erToggle('reminder')"></button></div>
+      ${d.reminder ? `<div class="setrow"><span class="grow small">ساعت</span><input type="time" value="${d.time}" onchange="A.er('time',this.value)"></div>
+      ${inQuiet(d.time) ? '<div class="warn">این ساعت در «ساعت سکوت» است؛ اعلانش ارسال نمی‌شود.</div>' : ''}
+      <label class="lbl">روزهای هفته</label><div class="days">${dayOrder.map((i) => `<button class="${d.mask & (1 << i) ? 'on' : ''}" onclick="A.erDay(${i})" aria-pressed="${!!(d.mask & (1 << i))}">${dayNames[i]}</button>`).join('')}</div>
+      <label class="lbl">متن اعلان</label><input class="field" maxlength="80" value="${esc(d.note)}" oninput="A.er('note',this.value)" placeholder="وقت ${esc(d.title || '…')} است. فقط یک قدم.">` : ''}
+      ${r ? `<div class="setrow"><span class="grow bold small">فعال</span><button class="switch ${d.active ? 'on' : ''}" role="switch" aria-checked="${d.active}" aria-label="فعال" onclick="A.erToggle('active')"></button></div>` : ''}
+      <button class="btn" style="margin-top:14px" onclick="A.saveRoutine('${r ? r.id : ''}')">ذخیره</button>
+      ${r ? `<button class="link" style="display:block;margin:8px auto 0;color:var(--danger)" onclick="A.delRoutine('${r.id}')">حذف روتین</button>` : ''}`;
+  };
+  sheets.notif = function () {
+    const s = S.settings, ps = permState();
+    const pText = { granted: '✓ اجازه داده شده', denied: '✕ اجازه داده نشده', web: 'نسخه وب (اعلان فقط در اپ اندروید)', unknown: 'نامشخص' }[ps];
+    const sw = (k, label) => `<div class="setrow"><span class="grow small bold">${label}</span><button class="switch ${s[k] ? 'on' : ''}" role="switch" aria-checked="${s[k]}" aria-label="${label}" onclick="A.setToggle('${k}')"></button></div>`;
+    return `<h3>اعلان‌ها و ساعت سکوت</h3>
+      <div class="card tight" style="margin-top:10px"><div class="row between small"><span>مجوز اعلان سیستم</span><b>${pText}</b></div>
+      ${ps === 'denied' ? `<p class="tiny muted" style="margin-top:6px">اگر دکمه زیر کار نکرد: تنظیمات گوشی ← برنامه‌ها ← کیمیاگر ← اعلان‌ها ← روشن.</p><button class="btn sm soft" style="margin-top:8px" onclick="A.askPermission()">درخواست مجوز</button>` : ''}</div>
+      <div class="card" style="padding:0 14px;margin-top:10px">
+      ${sw('notif', 'همه اعلان‌ها')}
+      ${s.notif ? `${sw('morning', 'پیام صبح‌بخیر')}${s.morning ? `<div class="setrow"><span class="grow small">ساعت پیام صبح</span><input type="time" value="${s.morningTime}" onchange="A.setTime('morningTime',this.value)"></div>` : ''}
+      ${sw('mission', 'یادآوری مأموریت روزانه')}${s.mission ? `<div class="setrow"><span class="grow small">ساعت یادآوری مأموریت</span><input type="time" value="${s.missionTime}" onchange="A.setTime('missionTime',this.value)"></div>` : ''}
+      ${sw('quietOn', 'ساعت سکوت')}${s.quietOn ? `<div class="setrow"><span class="grow small">از</span><input type="time" value="${s.quietStart}" onchange="A.setTime('quietStart',this.value)"><span class="small">تا</span><input type="time" value="${s.quietEnd}" onchange="A.setTime('quietEnd',this.value)"></div>` : ''}` : ''}
+      </div>
+      <p class="tiny muted" style="margin-top:10px">اعلان‌هایی که در ساعت سکوت بیفتند ارسال نمی‌شوند و بعداً هم جبران نمی‌شوند. اگر روتینی را انجام داده باشی، یادآوری همان روزش ارسال نمی‌شود. یادآوری‌های نزدیک به هم (کمتر از ۱۵ دقیقه) در یک اعلان جمع می‌شوند. زمان هر روتین از «مدیریت روتین‌ها» تنظیم می‌شود.</p>`;
+  };
+  sheets.perm = () => `<div class="center"><span style="font-size:42px">🔔</span><h3>یادآوری‌های مهربان</h3><p class="muted small" style="margin-top:6px">برای اینکه در زمان انتخابی‌ات یادآوری روتین و مأموریت را ببینی، اپ به اجازه اعلان نیاز دارد. بدون آن هم همه‌چیز کار می‌کند.</p>
+    <button class="btn" style="margin-top:16px" onclick="A.askPermission()">اجازه می‌دهم</button><button class="link" style="margin-top:6px" onclick="A.permLater()">فعلاً نه</button></div>`;
+  sheets.intent = () => `<h3>نیت ۳۰ روزه</h3><textarea class="field" id="it" rows="5" maxlength="300" style="margin-top:10px">${esc(S.intention)}</textarea><button class="btn" style="margin-top:12px" onclick="A.saveIntent()">ذخیره</button>`;
+  sheets.profile = function () {
+    const sel = ui.draft.pp || (ui.draft.pp = S.paths.slice());
+    return `<h3>نام و مسیرها</h3><label class="lbl">نام</label><input class="field" id="pn" maxlength="24" value="${esc(S.name)}">
+      <label class="lbl">مسیرها (حداکثر ۲)</label><div class="grid2">${D.paths.map((p) => `<button class="opt ${sel.includes(p.id) ? 'sel' : ''}" style="padding:10px" onclick="A.ppick('${p.id}')"><span class="ic" style="font-size:24px">${p.icon}</span><span class="t small">${p.name}</span></button>`).join('')}</div>
+      <label class="lbl">زمان روزانه</label><div class="filter">${[5, 15, 30].map((n) => `<button class="${S.dailyMin === n ? 'on' : ''}" onclick="A.setDaily(${n})">${fa(n)} دقیقه</button>`).join('')}</div>
+      <button class="btn" style="margin-top:14px" onclick="A.saveProfile()" ${sel.length ? '' : 'disabled'}>ذخیره</button>`;
+  };
+  sheets.privacy = () => `<h3>حریم خصوصی و پشتیبان</h3>
+    <div class="note" style="margin-top:10px">همه داده‌های تو (بازتاب‌ها، نیت و روتین‌ها) فقط روی همین گوشی ذخیره می‌شوند. اپ به اینترنت نیاز ندارد و چیزی ارسال نمی‌کند.</div>
+    <div class="warn" style="margin-top:10px">کیمیاگر یک ابزار رشد شخصی است و جایگزین روان‌درمانگر یا پزشک نیست. اگر حالت خیلی بد است یا به آسیب‌زدن به خودت فکر می‌کنی، لطفاً همین حالا با اورژانس اجتماعی ۱۲۳ یا صدای مشاور ۱۴۸۰ تماس بگیر.</div>
+    <button class="btn soft" style="margin-top:12px" onclick="A.exportData()">کپی پشتیبان (متن JSON)</button>
+    <button class="btn soft" style="margin-top:8px" onclick="A.openSheet('import')">بازگردانی از پشتیبان</button>
+    <button class="link" style="display:block;margin:12px auto 0;color:var(--danger)" onclick="A.openSheet('reset')">پاک کردن همه داده‌ها</button>`;
+  sheets.import = () => `<h3>بازگردانی پشتیبان</h3><p class="small muted">متن پشتیبان را اینجا بچسبان.</p><textarea class="field" id="imp" rows="6" style="margin-top:8px;direction:ltr"></textarea><button class="btn" style="margin-top:12px" onclick="A.importData()">بازگردانی</button>`;
+  sheets.reset = () => `<div class="center"><span style="font-size:40px">⚠️</span><h3>همه داده‌ها پاک شود؟</h3><p class="small muted">این کار برگشت‌پذیر نیست. اگر لازم داری، اول پشتیبان بگیر.</p><button class="btn" style="margin-top:14px;background:var(--danger)" onclick="A.resetAll()">بله، پاک کن</button><button class="link" style="margin-top:6px" onclick="A.closeSheet()">انصراف</button></div>`;
+  sheets.abandon = () => `<div class="center"><span style="font-size:40px">🌙</span><h3>اشکالی ندارد.</h3><p class="small muted">مأموریت بدون جریمه بسته می‌شود. می‌توانی بعداً دوباره سراغش بروی.</p><button class="btn" style="margin-top:14px" onclick="A.abandon()">بستن مأموریت</button><button class="link" style="margin-top:6px" onclick="A.closeSheet()">ادامه می‌دهم</button></div>`;
+  sheets.crystals = function () {
+    const st = stats();
+    return `<h3>کریستال‌ها</h3><p class="small muted">دستاوردهای کیفی برای مجموعه‌ای از رفتارها.</p>${D.crystals.map((c) => `<div class="setrow"><span style="font-size:26px;${st.crystals[c.id] ? '' : 'filter:grayscale(1) opacity(.4)'}">${c.icon}</span><span class="grow"><b class="small">${c.name}</b><br><span class="tiny muted">${c.rule}</span></span>${st.crystals[c.id] ? '<span class="chip">✓</span>' : '<span class="tiny muted">قفل</span>'}</div>`).join('')}`;
+  };
+  sheets.region = function (p) {
+    const st = stats(), r = D.regions.find((x) => x.id === p.id), pa = pathOf(r.path), open = st.unlocked.includes(r.id);
+    const steps = st.pathSteps[r.path] || 0;
+    const h = D.hidden.find((x) => x.region === r.id);
+    return `<div class="center"><span style="font-size:42px">${open ? pa.icon : '🔒'}</span><h3>${r.name}</h3><p class="small muted">مسیر ${pa.name}</p></div>
+      ${open ? `<div class="note" style="margin-top:12px">این منطقه باز است. ${h ? 'مأموریت مخفی آن: «' + esc(h.title) + '»' : ''}</div>
+      ${h && hiddenAvailable(st).some((x) => x.id === h.id) ? `<button class="btn" style="margin-top:12px" onclick="A.closeSheet();A.go('mission',{id:'${h.id}'})">رفتن به مأموریت مخفی</button>` : ''}` :
+      `<div class="card" style="margin-top:12px"><div class="row between small"><span>اکسیر</span><b>${fa(Math.min(st.xp, r.xp))} / ${fa(r.xp)}</b></div><div class="bar" style="margin-top:4px"><i style="width:${Math.min(100, 100 * st.xp / Math.max(1, r.xp))}%;background:var(--gold)"></i></div>
+      <div class="row between small" style="margin-top:10px"><span>قدم واقعی در مسیر ${pa.name}</span><b>${fa(Math.min(steps, r.steps))} / ${fa(r.steps)}</b></div><div class="bar" style="margin-top:4px"><i style="width:${Math.min(100, 100 * steps / r.steps)}%;background:${pa.color}"></i></div></div>
+      <p class="tiny muted" style="margin-top:8px">مناطق فقط با اکسیر باز نمی‌شوند؛ اقدام واقعی در همان مسیر هم لازم است.</p>
+      <button class="btn soft" style="margin-top:10px" onclick="A.closeSheet();A.setFilter('${r.path}');A.tab('missions')">مأموریت‌های ${pa.name}</button>`}`;
+  };
+
+  // ---------- Actions ----------
+  const A = window.A = {
+    tab, go, openSheet, closeSheet, toggleRoutine, askPermission,
+    back: () => window.appBack(),
+    ob(n) { ui.ob = n; render(); if (n === 1) setTimeout(() => { const e = document.getElementById('nm'); if (e) e.focus(); }, 300); },
+    setName(v) { S.name = v.slice(0, 24); save(); const b = document.getElementById('nmb'); if (b) b.disabled = !v.trim(); },
+    pickPath(id) { const i = S.paths.indexOf(id); if (i >= 0) S.paths.splice(i, 1); else { if (S.paths.length >= 2) { toast('حداکثر دو مسیر؛ اول یکی را بردار.'); return; } S.paths.push(id); } save(); render(); },
+    pickTime(m) { ui.draft.timeSel = m; S.dailyMin = m || 15; save(); render(); },
+    pickRoutine(k) { const d = ui.draft; d.rsel = d.rsel || []; const i = d.rsel.indexOf(k); if (i >= 0) d.rsel.splice(i, 1); else { if (d.rsel.length + (d.custom || []).length >= 3) { toast('برای شروع حداکثر ۳ روتین.'); return; } d.rsel.push(k); } render(); },
+    addCustom() {
+      const v = (document.getElementById('cr').value || '').trim(); if (!v) return;
+      if (!S.onboarded) { const d = ui.draft; d.custom = d.custom || []; if ((d.rsel || []).length + d.custom.length >= 3) { toast('برای شروع حداکثر ۳ روتین.'); return; } d.custom.push(v); }
+      closeSheet();
+    },
+    rmCustom(i) { ui.draft.custom.splice(i, 1); render(); },
+    setIntent(v) { S.intention = v.slice(0, 300); save(); const b = document.getElementById('itb'); if (b) b.textContent = v.trim() ? 'ادامه' : 'رد شدن'; },
+    finishOnboarding() {
+      const d = ui.draft;
+      S.routines = (d.rsel || []).map((k) => { const t = D.routineTemplates.find((x) => x.key === k); return { id: uidGen(), key: k, title: t.title, icon: t.icon, xp: t.xp, path: t.path, time: t.time, mask: 127, reminder: true, note: t.note, active: true }; })
+        .concat((d.custom || []).map((c) => ({ id: uidGen(), key: 'custom', title: c, icon: '✨', xp: 10, path: 'action', time: '20:00', mask: 127, reminder: true, note: '', active: true })));
+      S.onboarded = true; S.created = today();
+      // اولین مأموریت: کوتاه و کم‌ریسک از مسیر اول
+      S.day = { date: today(), missionId: pickMission(0, S.paths[0], 1).id, swaps: 0 };
+      save(); ui.draft = {}; ui.tab = 'home';
+      go('first');
+    },
+    swap() { S.day.swaps++; S.day.missionId = pickMission(S.day.swaps).id; save(); render(); toast('مأموریت تازه آماده است.'); },
+    setFilter(f) { ui.filter = f; render(); },
+    mtab(t) { ui.mirrorTab = t; render(); },
+    startMission(id) {
+      if (!S.active) { S.active = { mid: id, startedAt: Date.now(), uid: uidGen() }; save(); }
+      if (!S.settings.permAsked && permState() === 'denied') setTimeout(() => openSheet('perm'), 400);
+      go('doing');
+    },
+    draft: soft((k, v) => { ui.draft[k] = v; render(); }),
+    draftText(v) { ui.draft.reflection = v; },
+    submitResult() {
+      const d = ui.draft, act = S.active || { mid: ui.params.id, startedAt: Date.now(), uid: uidGen() };
+      const m = missionById(act.mid), before = stats();
+      const failed = d.outcome === 'failed', refl = (d.reflection || '').trim();
+      const rec = { uid: act.uid, mid: m.id, path: m.path, title: m.title, date: today(), startedAt: act.startedAt, completedAt: Date.now(),
+        status: failed ? 'failed' : 'done', outcome: d.outcome, pre: d.pre, feeling: failed ? null : d.feeling, reflection: refl,
+        xp: failed ? (refl ? 5 : 0) : m.xp + (refl ? 5 : 0) };
+      S.records.push(rec);
+      S.insights.push({ id: uidGen(), uid: rec.uid, path: m.path, text: makeInsight(rec, m), src: 'از مأموریت «' + m.title + '»', date: today(), saved: false });
+      if (refl) S.insights.push({ id: uidGen(), uid: rec.uid + '-u', path: m.path, text: refl, src: 'نوشته خودت · ' + m.title, date: today(), saved: true });
+      S.active = null; save(); syncNotifications();
+      if (!failed) afterProgress(before);
+      go('success', { uid: rec.uid });
+    },
+    saveInsight(id) { const i = S.insights.find((x) => x.id === id); if (i) i.saved = true; save(); render(); toast('در آینه ذخیره شد. 🪞'); },
+    unsave(id) { const i = S.insights.find((x) => x.id === id); if (i) i.saved = false; save(); render(); },
+    smaller(path) {
+      const m = pickMission(Date.now() % 1000, path, 1);
+      S.day.missionId = m.id; save(); ui.screen = null; ui.tab = 'home'; render(); toast('یک قدم کوچک‌تر برایت گذاشتیم.');
+    },
+    finish() { ui.screen = null; ui.tab = 'home'; render(); scrollTop(); },
+    abandon() {
+      if (S.active) { const m = missionById(S.active.mid); S.records.push({ uid: S.active.uid, mid: m.id, path: m.path, title: m.title, date: today(), status: 'abandoned', xp: 0 }); }
+      S.active = null; save(); ui.sheet = null; ui.screen = null; ui.tab = 'home'; render();
+    },
+    microNext: soft(() => { ui.draft.mr = (ui.draft.mr || 0) + 1; render(); }),
+    microDone() { const before = stats(); S.micros.push({ date: today(), at: Date.now() }); save(); closeSheet(); toast('🧪 یک قدم واقعی دیگر ثبت شد. +۵ اکسیر'); afterProgress(before); },
+    // routine editor
+    er(k, v) { ui.draft.er[k] = v; if (k === 'time') { ui._keepScroll = true; render(); } },
+    erToggle: soft((k) => { ui.draft.er[k] = !ui.draft.er[k]; render(); }),
+    erDay: soft((i) => { ui.draft.er.mask ^= (1 << i); render(); }),
+    erTpl(k) { const t = D.routineTemplates.find((x) => x.key === k); Object.assign(ui.draft.er, { key: k, title: t.title, icon: t.icon, xp: t.xp, path: t.path, time: t.time, note: t.note }); render(); },
+    saveRoutine(id) {
+      const d = ui.draft.er; d.title = (d.title || '').trim();
+      if (!d.title) { toast('عنوان روتین را بنویس.'); return; }
+      if (d.reminder && !d.mask) { toast('حداقل یک روز را انتخاب کن.'); return; }
+      const others = S.routines.filter((r) => r.active && r.id !== id).length;
+      if (d.active && others >= routineLimit()) { toast(`فعلاً حداکثر ${fa(routineLimit())} روتین فعال. یکی را متوقف کن.`); return; }
+      if (id) Object.assign(S.routines.find((r) => r.id === id), d);
+      else S.routines.push(Object.assign({ id: uidGen(), key: d.key || 'custom' }, d));
+      ui.draft = {}; save(); syncNotifications(); openSheet('routines'); toast('ذخیره شد.');
+    },
+    delRoutine(id) { S.routines = S.routines.filter((r) => r.id !== id); ui.draft = {}; save(); syncNotifications(); openSheet('routines'); toast('روتین حذف شد. سابقه‌اش در آمار می‌ماند.'); },
+    setToggle: soft((k) => { S.settings[k] = !S.settings[k]; save(); syncNotifications(); render(); }),
+    setTime(k, v) { if (!v) return; S.settings[k] = v; save(); syncNotifications(); ui._keepScroll = true; render(); },
+    permLater() { S.settings.permAsked = true; save(); closeSheet(); },
+    saveIntent() { S.intention = document.getElementById('it').value.slice(0, 300); save(); closeSheet(); },
+    ppick: soft((id) => { const s = ui.draft.pp, i = s.indexOf(id); if (i >= 0) s.splice(i, 1); else if (s.length < 2) s.push(id); else toast('حداکثر دو مسیر.'); render(); }),
+    setDaily: soft((n) => { S.dailyMin = n; save(); render(); }),
+    saveProfile() { const n = document.getElementById('pn').value.trim(); if (n) S.name = n; S.paths = ui.draft.pp.slice(); ui.draft = {}; save(); closeSheet(); toast('ذخیره شد.'); },
+    exportData() {
+      const txt = JSON.stringify(S);
+      const done = () => toast('پشتیبان کپی شد؛ آن را جایی امن نگه دار.');
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, () => fallbackCopy(txt, done)); else fallbackCopy(txt, done);
+    },
+    importData() {
+      try { const o = JSON.parse(document.getElementById('imp').value); if (!o || !o.v) throw 0; S = Object.assign(defaults(), o); save(); syncNotifications(); closeSheet(); toast('بازگردانی شد.'); }
+      catch (e) { toast('متن پشتیبان معتبر نیست.'); }
+    },
+    resetAll() { localStorage.removeItem(KEY); S = defaults(); ui.sheet = null; ui.ob = 0; ui.screen = null; ui.draft = {}; syncNotifications(); render(); }
+  };
+  function fallbackCopy(txt, cb) { const t = document.createElement('textarea'); t.value = txt; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); cb(); } catch (e) { toast('کپی ممکن نشد.'); } t.remove(); }
+
+  // اولین مأموریت بعد از onboarding
+  screens.first = function () {
+    const m = todayMission(), p = pathOf(m.path);
+    return `<div class="screen" style="background:var(--bg)"><div style="position:relative;height:230px">${ART.valley()}<h2 style="position:absolute;top:22px;width:100%;text-align:center;color:var(--g800)">اولین مأموریت تو</h2></div>
+      <div class="pad" style="margin-top:-60px;position:relative"><div class="card center fade-in" style="padding:22px 16px">
+      <div style="width:70px;height:70px;margin:-56px auto 6px;border-radius:50%;background:var(--paper);border:2px solid var(--gold2);display:grid;place-items:center;font-size:34px">${p.icon}</div>
+      <h3 style="font-size:19px">یک قدم کوچک</h3><p style="margin-top:6px">${esc(m.act)}</p>
+      <div class="meta3"><div>مهارت<b>${p.name}</b></div><div>زمان<b>${fa(m.min)} دقیقه</b></div><div>پاداش<b class="gold">${fa(m.xp)} اکسیر</b></div></div>
+      <button class="btn" onclick="A.startMission('${m.id}')">شروع مأموریت</button>
+      <button class="link" style="margin-top:4px" onclick="A.finish()">بعداً؛ اول خانه را ببینم</button></div></div></div>`;
+  };
+
+  // ---------- Boot ----------
+  if (S.active && Date.now() - S.active.startedAt > 24 * 3600e3) {
+    // مأموریت رهاشده بعد از ۲۴ ساعت بدون جریمه بسته می‌شود
+    const m = missionById(S.active.mid);
+    if (m) S.records.push({ uid: S.active.uid, mid: m.id, path: m.path, title: m.title, date: today(), status: 'abandoned', xp: 0 });
+    S.active = null; save();
+  }
+  if (S.onboarded && S.active) ui.screen = 'doing';
+  S.lastSeen = today(); save();
+  render();
+  syncNotifications();
+  refreshCapPerm();
+  if (CAP && CAP.App && CAP.App.addListener) { try { CAP.App.addListener('backButton', () => window.appBack()); } catch (e) { } }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (S.day.date !== today() || LN) syncNotifications(); refreshCapPerm(); render(); } });
+})();
+
+</script>
+</body>
+</html>
