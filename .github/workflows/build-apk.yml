@@ -5,6 +5,9 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -21,9 +24,7 @@ jobs:
           java-version: 17
 
       - name: Install dependencies
-        run: |
-          npm install
-          npm install --no-save @capacitor/cli@6 @capacitor/core@6 @capacitor/android@6 @capacitor/assets@3
+        run: npm install
 
       - name: Create Android project
         run: npx cap add android
@@ -31,16 +32,53 @@ jobs:
       - name: Generate icons and splash
         run: npx capacitor-assets generate --android
 
+      - name: Notification icon and permission
+        run: |
+          mkdir -p android/app/src/main/res/drawable
+          cp assets/ic_stat_kimiagar.png android/app/src/main/res/drawable/ic_stat_kimiagar.png
+          M=android/app/src/main/AndroidManifest.xml
+          grep -q POST_NOTIFICATIONS $M || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n</manifest>#' $M
+
+      - name: Use fixed signing key (so updates install over previous version)
+        run: |
+          mkdir -p ~/.android
+          if [ -f debug.keystore ]; then
+            cp debug.keystore ~/.android/debug.keystore
+          elif [ -f debug.keystore.b64.txt ]; then
+            base64 -d debug.keystore.b64.txt > ~/.android/debug.keystore
+          else
+            echo "No keystore found; a new key will be created."
+          fi
+
       - name: Sync web files
         run: npx cap sync android
 
       - name: Build debug APK
-        run: |
-          chmod +x android/gradlew
-          cd android
-          ./gradlew assembleDebug
+        working-directory: android
+        run: ./gradlew assembleDebug
 
-      - uses: actions/upload-artifact@v4
+      - name: Prepare output files
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/debug/app-debug.apk out/kimiagar.apk
+          cp out/kimiagar.apk out/kimiagar-apk.txt
+
+      - name: Upload APK for direct install
+        uses: actions/upload-artifact@v4
         with:
-          name: kimiagari-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: kimiagar-apk
+          path: out/kimiagar.apk
+
+      - name: Upload copy for email and messengers
+        uses: actions/upload-artifact@v4
+        with:
+          name: kimiagar-for-email
+          path: out/kimiagar-apk.txt
+
+      - name: Publish download link (GitHub Release)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Kimiagar build ${{ github.run_number }}
+          files: out/kimiagar.apk
+          make_latest: true
