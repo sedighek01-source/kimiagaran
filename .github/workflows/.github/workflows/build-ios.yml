@@ -1,0 +1,70 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ipa:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create iOS project
+        run: npx cap add ios
+
+      - name: Generate icons and splash
+        run: npx capacitor-assets generate --ios
+
+      - name: Sync web files
+        run: npx cap sync ios
+
+      - name: Build unsigned app
+        run: |
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package IPA
+        run: |
+          mkdir -p out/Payload
+          cp -R build/Build/Products/Release-iphoneos/App.app out/Payload/
+          cd out
+          zip -qr kimiagar.ipa Payload
+          cp kimiagar.ipa kimiagar-ipa.txt
+          rm -rf Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: kimiagar-ipa
+          path: out/kimiagar.ipa
+
+      - name: Upload copy for email and messengers
+        uses: actions/upload-artifact@v4
+        with:
+          name: kimiagar-ipa-for-email
+          path: out/kimiagar-ipa.txt
+
+      - name: Publish download link (GitHub Release)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ios-build-${{ github.run_number }}
+          name: Kimiagar iOS build ${{ github.run_number }}
+          files: out/kimiagar.ipa
+          make_latest: false
